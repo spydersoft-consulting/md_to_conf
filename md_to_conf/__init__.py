@@ -271,62 +271,68 @@ def add_local_refs(page_id: int, space_id: int, title, html, converter):
     LOGGER.info("Converting confluence local links...")
 
     headers = re.findall(r"<h\d+>(.*?)</h\d+>", html, re.DOTALL)
-    if headers:
-        headers_map = {}
-        headers_count = {}
 
-        for header in headers:
-            key = ref_prefix + converter.slug(header, True)
+    if not headers:
+        return html
 
+    headers_map = {}
+    headers_count = {}
+
+    for header in headers:
+        key = ref_prefix + converter.slug(header, True)
+
+        if VERSION == 1:
+            value = re.sub(r"(<.+?>| )", "", header)
+        if VERSION == 2:
+            value = converter.slug(header, False)
+
+        if key in headers_map:
+            alt_count = headers_count[key]
+
+            alt_key = key + (ref_postfix % alt_count)
+            alt_value = value + (".%s" % alt_count)
+
+            headers_map[alt_key] = alt_value
+            headers_count[key] = alt_count + 1
+        else:
+            headers_map[key] = value
+            headers_count[key] = 1
+
+    links = re.findall(r'<a href="#.+?">.+?</a>', html)
+
+    if not links:
+        return html
+
+    for link in links:
+        matches = re.search(r'<a href="(#.+?)">(.+?)</a>', link)
+        ref = matches.group(1)
+        alt = matches.group(2)
+
+        result_ref = headers_map.get(ref)
+
+        if result_ref:
+            base_uri = "%s/spaces/%d/pages/%d/%s" % (
+                CONFLUENCE_API_URL,
+                space_id,
+                page_id,
+                "+".join(title.split()),
+            )
             if VERSION == 1:
-                value = re.sub(r"(<.+?>| )", "", header)
+                replacement = (
+                    '<ac:link ac:anchor="%s">'
+                    "<ac:plain-text-link-body>"
+                    "<![CDATA[%s]]></ac:plain-text-link-body></ac:link>"
+                    % (result_ref, re.sub(r"( *<.+?> *)", " ", alt))
+                )
             if VERSION == 2:
-                value = converter.slug(header, False)
+                replacement_uri = "%s#%s" % (base_uri, result_ref)
+                replacement = '<a href="%s" title="%s">%s</a>' % (
+                    replacement_uri,
+                    alt,
+                    alt,
+                )
 
-            if key in headers_map:
-                alt_count = headers_count[key]
-
-                alt_key = key + (ref_postfix % alt_count)
-                alt_value = value + (".%s" % alt_count)
-
-                headers_map[alt_key] = alt_value
-                headers_count[key] = alt_count + 1
-            else:
-                headers_map[key] = value
-                headers_count[key] = 1
-
-        links = re.findall(r'<a href="#.+?">.+?</a>', html)
-        if links:
-            for link in links:
-                matches = re.search(r'<a href="(#.+?)">(.+?)</a>', link)
-                ref = matches.group(1)
-                alt = matches.group(2)
-
-                result_ref = headers_map.get(ref)
-
-                if result_ref:
-                    base_uri = "%s/spaces/%d/pages/%d/%s" % (
-                        CONFLUENCE_API_URL,
-                        space_id,
-                        page_id,
-                        "+".join(title.split()),
-                    )
-                    if VERSION == 1:
-                        replacement = (
-                            '<ac:link ac:anchor="%s">'
-                            "<ac:plain-text-link-body>"
-                            "<![CDATA[%s]]></ac:plain-text-link-body></ac:link>"
-                            % (result_ref, re.sub(r"( *<.+?> *)", " ", alt))
-                        )
-                    if VERSION == 2:
-                        replacement_uri = "%s#%s" % (base_uri, result_ref)
-                        replacement = '<a href="%s" title="%s">%s</a>' % (
-                            replacement_uri,
-                            alt,
-                            alt,
-                        )
-
-                    html = html.replace(link, replacement)
+            html = html.replace(link, replacement)
 
     return html
 
