@@ -360,24 +360,26 @@ def get_properties_to_update(client, page_id: int):
                 }
             )
 
-    if PROPERTIES:
-        for key in PROPERTIES:
-            found = False
-            for existing_prop in properties:
-                if existing_prop["key"] == key:
-                    properties_for_update.append(
-                        {
-                            "key": key,
-                            "version": existing_prop["version"]["number"] + 1,
-                            "value": PROPERTIES[key],
-                            "id": existing_prop["id"],
-                        }
-                    )
-                    found = True
-            if not found:
+    if not PROPERTIES:
+        return properties_for_update
+    
+    for key in PROPERTIES:
+        found = False
+        for existing_prop in properties:
+            if existing_prop["key"] == key:
                 properties_for_update.append(
-                    {"key": key, "version": 1, "value": PROPERTIES[key]}
+                    {
+                        "key": key,
+                        "version": existing_prop["version"]["number"] + 1,
+                        "value": PROPERTIES[key],
+                        "id": existing_prop["id"],
+                    }
                 )
+                found = True
+        if not found:
+            properties_for_update.append(
+                {"key": key, "version": 1, "value": PROPERTIES[key]}
+            )
 
     return properties_for_update
 
