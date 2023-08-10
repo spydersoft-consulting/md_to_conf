@@ -461,8 +461,8 @@ class ConfluenceApiClient:
         data = response["data"]
         for label in labels:
             found = False
-            for existingLabel in data["results"]:
-                if label == existingLabel["name"]:
+            for existing_label in data["results"]:
+                if label == existing_label["name"]:
                     found = True
 
             if not found:

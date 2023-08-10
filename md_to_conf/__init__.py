@@ -312,11 +312,6 @@ def add_local_refs(page_id: int, space_id: int, title, html, converter):
                         "+".join(title.split()),
                     )
                     if VERSION == 1:
-                        replacement_uri = "%s#%s-%s" % (
-                            base_uri,
-                            "".join(title.split()),
-                            result_ref,
-                        )
                         replacement = (
                             '<ac:link ac:anchor="%s">'
                             "<ac:plain-text-link-body>"
@@ -345,31 +340,31 @@ def get_properties_to_update(client, page_id: int):
     """
     properties = client.get_page_properties(page_id)
     properties_for_update = []
-    for existingProp in properties:
+    for existing_prop in properties:
         # Change the editor version
-        if existingProp["key"] == "editor" and existingProp["value"] != (
+        if existing_prop["key"] == "editor" and existing_prop["value"] != (
             "v%d" % VERSION
         ):
             properties_for_update.append(
                 {
                     "key": "editor",
-                    "version": existingProp["version"]["number"] + 1,
+                    "version": existing_prop["version"]["number"] + 1,
                     "value": ("v%d" % VERSION),
-                    "id": existingProp["id"],
+                    "id": existing_prop["id"],
                 }
             )
 
     if PROPERTIES:
         for key in PROPERTIES:
             found = False
-            for existingProp in properties:
-                if existingProp["key"] == key:
+            for existing_prop in properties:
+                if existing_prop["key"] == key:
                     properties_for_update.append(
                         {
                             "key": key,
-                            "version": existingProp["version"]["number"] + 1,
+                            "version": existing_prop["version"]["number"] + 1,
                             "value": PROPERTIES[key],
-                            "id": existingProp["id"],
+                            "id": existing_prop["id"],
                         }
                     )
                     found = True

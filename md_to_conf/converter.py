@@ -59,7 +59,7 @@ class MarkdownConverter:
         :param html: string
         :return: modified html string
         """
-        html = re.sub(
+        html = str.replace(
             r"<p>\[TOC\]</p>",
             '<p><ac:structured-macro ac:name="toc" ac:schema-version="1"/></p>',
             html,
