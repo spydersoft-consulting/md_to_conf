@@ -277,7 +277,7 @@ class MarkdownConverter:
             key = ref_prefix + self.slug(header, True)
 
             if self.editor_version == 1:
-                value = re.sub(r"(<.+?>| )", "", header)
+                value = re.sub(r"(<.+>| )", "", header)
             if self.editor_version == 2:
                 value = self.slug(header, False)
 
@@ -317,7 +317,7 @@ class MarkdownConverter:
                         '<ac:link ac:anchor="%s">'
                         "<ac:plain-text-link-body>"
                         "<![CDATA[%s]]></ac:plain-text-link-body></ac:link>"
-                        % (result_ref, re.sub(r"( *<.+?> *)", " ", alt))
+                        % (result_ref, re.sub(r"( *<.+> *)", " ", alt))
                     )
                 if self.editor_version == 2:
                     replacement_uri = "%s#%s" % (base_uri, result_ref)
