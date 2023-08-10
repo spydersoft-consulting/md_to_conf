@@ -282,7 +282,7 @@ def add_local_refs(page_id: int, space_id: int, title, html, converter):
     if not links:
         return html
 
-    html = converter.process_links(links, headers_map, space_id, page_id, title)
+    html = converter.process_links(html, links, headers_map, space_id, page_id, title)
 
     return html
 
@@ -374,7 +374,7 @@ def main():
         sys.exit(0)
 
     client = ConfluenceApiClient(
-        CONFLUENCE_API_URL, USERNAME, API_KEY, SPACE_KEY, VERSION
+        CONFLUENCE_API_URL, USERNAME, API_KEY, SPACE_KEY, VERSION, not NOSSL
     )
 
     LOGGER.info("Checking if Atlas page exists...")

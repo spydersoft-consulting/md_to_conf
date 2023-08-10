@@ -20,7 +20,13 @@ LabelInfo = collections.namedtuple("LabelInfo", ["id", "name", "prefix", "label"
 
 class ConfluenceApiClient:
     def __init__(
-        self, confluence_api_url, username, api_key, space_key, editor_version
+        self,
+        confluence_api_url,
+        username,
+        api_key,
+        space_key,
+        editor_version,
+        use_ssl=True,
     ):
         self.user_name = username
         self.api_key = api_key
@@ -28,6 +34,7 @@ class ConfluenceApiClient:
         self.space_key = space_key
         self.space_id = -1
         self.editor_version = editor_version
+        self.use_ssl = use_ssl
 
     def get_session(self, retry=False, json=True):
         """
@@ -51,8 +58,11 @@ class ConfluenceApiClient:
                 status_forcelist=retry_status_forcelist,
             )
             adapter = requests.adapters.HTTPAdapter(max_retries=retry)
-            session.mount("http://", adapter)
-            session.mount("https://", adapter)
+            if self.use_ssl:
+                session.mount("https://", adapter)
+            else:
+                session.mount("http://", adapter)
+
         session.auth = (self.user_name, self.api_key)
         if json:
             session.headers.update({"Content-Type": "application/json"})

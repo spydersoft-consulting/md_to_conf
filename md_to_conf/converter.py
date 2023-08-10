@@ -296,7 +296,7 @@ class MarkdownConverter:
         return headers_map
 
     def process_links(
-        self, links, headers_map, space_id: int, page_id: int, title: str
+        self, html, links, headers_map, space_id: int, page_id: int, title: str
     ):
         for link in links:
             matches = re.search(r'<a href="(#.+?)">(.+?)</a>', link)
@@ -328,6 +328,7 @@ class MarkdownConverter:
                     )
 
                 html = html.replace(link, replacement)
+                return html
 
     def process_refs(self, html):
         """
