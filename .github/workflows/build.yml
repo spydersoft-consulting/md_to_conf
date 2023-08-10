@@ -29,10 +29,10 @@ jobs:
     - name: Determine Version
       uses: gittools/actions/gitversion/execute@v0
     - name: Set default version
-      run: echo "VERSION=${{ env.GitVersion_FullSemVer }}" >> $GITHUB_ENV
+      run: echo "VERSION=${{ env.GitVersion_MajorMinorPatch }}.dev${{ env.GitVersion_BuildMetaData }}" >> $GITHUB_ENV
     - name: Set release version
       if: ${{ github.event.action == 'published' && !github.event.release.draft}}
-      run:  TAG=$(git describe --tags); if github.event.release.prerelease; then RELEASE="-prerelease"; else  RELEASE="";  fi; echo "VERSION=${TAG}${RELEASE}" >> $GITHUB_ENV
+      run:  TAG=$(git describe --tags); if github.event.release.prerelease; then RELEASE=".pre"; else  RELEASE="";  fi; echo "VERSION=${TAG}${RELEASE}" >> $GITHUB_ENV
     - uses: actions/checkout@v3
     - name: Set up Python 3.11
       uses: actions/setup-python@v3
