@@ -54,12 +54,15 @@ jobs:
     - name: Build
       run: |
         echo "${{ env.VERSION }}" > version.txt
-        ls ./
         python setup.py bdist_wheel
-        ls ./dist
+    - name: SonarCloud Scan
+      uses: sonarsource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     - name: Publish package
       if: ${{ github.event.action == 'published' && !github.event.release.draft}}
-      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}

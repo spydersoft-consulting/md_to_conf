@@ -317,8 +317,6 @@ class ConfluenceApiClient:
         else:
             return True
 
-        return []
-
     def get_attachment(self, page_id: int, filename):
         """
         Get page attachment
