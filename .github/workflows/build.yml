@@ -54,6 +54,7 @@ jobs:
     - name: Build
       run: |
         echo ${{ env.VERSION }} > version.txt
+        python -m pip install build
         python setup.py bdist_wheel
         ls ./dist
     - name: Publish package
