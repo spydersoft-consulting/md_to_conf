@@ -226,7 +226,7 @@ class MarkdownConverter:
         tag = re.sub("<(em|strong)>%s\s:<.*?>\s" % tagtype, "", tag, re.IGNORECASE)
         tag = re.sub("<(em|strong)>%s<.*?>:\s" % tagtype, "", tag, re.IGNORECASE)
         tag = re.sub("<(em|strong)>%s\s<.*?>:\s" % tagtype, "", tag, re.IGNORECASE)
-        string_start = re.search("<.*?>", tag)
+        string_start = re.search("<[^>]*>", tag)
         tag = self.upper_chars(tag, [string_start.end()])
         return tag
 
