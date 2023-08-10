@@ -263,7 +263,7 @@ class MarkdownConverter:
         slug_string = re.sub(r"&[a-z]+;", "", slug_string)
 
         # Replace all spaces ( ) with dash (-)
-        slug_string = re.sub(r"[ ]", "-", slug_string)
+        slug_string = str.replace(" ", "-", slug_string)
 
         # Remove all special chars, except for dash (-)
         slug_string = re.sub(r"[^a-zA-Z0-9-]", "", slug_string)

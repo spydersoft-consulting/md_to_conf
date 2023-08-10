@@ -279,7 +279,7 @@ def add_local_refs(page_id: int, space_id: int, title, html, converter):
             key = ref_prefix + converter.slug(header, True)
 
             if VERSION == 1:
-                value = re.sub(r"(<.+?>|[ ])", "", header)
+                value = re.sub(r"(<.+?>| )", "", header)
             if VERSION == 2:
                 value = converter.slug(header, False)
 
