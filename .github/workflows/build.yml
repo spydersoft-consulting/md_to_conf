@@ -6,11 +6,11 @@ name: Python package
 on:
   push:
     branches: 
-      - master
+      - main
       - feature/*
   pull_request:
     branches:
-      - master
+      - main
   release:
     types: [ published ]
 
