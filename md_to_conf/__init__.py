@@ -384,6 +384,8 @@ def main():
         client.delete_page(page.id)
         sys.exit(1)
 
+    parent_page_id = 0
+
     if ANCESTOR:
         parent_page = client.get_page(ANCESTOR)
         if parent_page:
@@ -391,14 +393,9 @@ def main():
         else:
             LOGGER.error("Error: Parent page does not exist: %s", ANCESTOR)
             sys.exit(1)
-    else:
-        parent_page_id = 0
 
     if not page:
         page = client.create_page(title, html, parent_page_id)
-
-    if ATTACHMENTS:
-        add_attachments(page.id, ATTACHMENTS, client)
 
     html = add_images(page.id, html, client)
     # Add local references
@@ -407,7 +404,7 @@ def main():
     client.update_page(page.id, title, html, page.version, parent_page_id)
 
     properties_for_update = get_properties_to_update(client, page.id)
-    if properties_for_update and len(properties_for_update) > 0:
+    if len(properties_for_update) > 0:
         LOGGER.info(
             "Updating %s page content properties..." % len(properties_for_update)
         )
@@ -417,6 +414,9 @@ def main():
 
     if LABELS:
         client.update_labels(page.id, LABELS)
+
+    if ATTACHMENTS:
+        add_attachments(page.id, ATTACHMENTS, client)
 
     LOGGER.info("Markdown Converter completed successfully.")
 
