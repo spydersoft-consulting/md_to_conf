@@ -11,6 +11,13 @@ import requests
 LOGGER = logging.getLogger(__name__)
 
 
+CheckedResponse = collections.namedtuple("CheckedResponse", ["status_code", "data"])
+
+PageInfo = collections.namedtuple("PageInfo", ["id", "spaceId", "version", "link"])
+
+LabelInfo = collections.namedtuple("LabelInfo", ["id", "name", "prefix", "label"])
+
+
 class ConfluenceApiClient:
     def __init__(
         self, confluence_api_url, username, api_key, space_key, editor_version
@@ -23,6 +30,14 @@ class ConfluenceApiClient:
         self.editor_version = editor_version
 
     def get_session(self, retry=False, json=True):
+        """
+        Retrieve a `requests` session object
+
+        :param retry: Configure the request with a retry adapter.
+        :param json: Configure the request to set Content-Type to 'application/json'
+        :return: A session from the `requests` module
+
+        """
         session = requests.Session()
         if retry:
             retry_max_requests = 5
@@ -43,8 +58,29 @@ class ConfluenceApiClient:
             session.headers.update({"Content-Type": "application/json"})
         return session
 
-    def check_errors_and_get_json(self, response):
-        # Check for errors
+    def log_not_found(self, object_name: str, log_values: dict[str, str]):
+        """
+        Write a "not found" message to the LOGGER
+
+        :param object_name: str : The name to show in the log message
+        :param log_values: Additional key/value pairs to log
+        :return: nothing
+
+        """
+        LOGGER.error("%s not found." % object_name)
+        LOGGER.error("Diagnostic Information")
+        LOGGER.error("\tURL: %s", self.confluence_api_url)
+        for log_value in log_values:
+            LOGGER.error("\t%s: %s" % log_value.key, log_value.value)
+
+    def check_errors_and_get_json(self, response: requests.Response):
+        """
+        Check the response for error codes
+
+        :param response: requests.Response : The response from a request
+        :return:
+
+        """
         try:
             response.raise_for_status()
         except requests.RequestException as err:
@@ -55,9 +91,9 @@ class ConfluenceApiClient:
                 LOGGER.error("Error: %d - %s", response.status_code, response.content)
                 sys.exit(1)
 
-        return {"status_code": response.status_code, "data": response.json()}
+        return CheckedResponse(response.status_code, response.json())
 
-    def update_page(self, page_id: int, title, body, version, parent_id):
+    def update_page(self, page_id: int, title: str, body: str, version: int, parent_id):
         """
         Update a page
 
@@ -89,15 +125,12 @@ class ConfluenceApiClient:
             session.put(url, data=json.dumps(page_json))
         )
 
-        if response["status_code"] == 404:
-            LOGGER.error("Error: Page not found. Check the following are correct:")
-            LOGGER.error("\tSpace Key : %s", self.space_key)
-            LOGGER.error("\tURL: %s", self.confluence_api_url)
+        if response.status_code == 404:
+            self.log_not_found("Page", {"Page Id": "%d" % page_id})
             return False
 
-        if response["status_code"] == 200:
-            data = response["data"]
-            link = "%s%s" % (self.confluence_api_url, data["_links"]["webui"])
+        if response.status_code == 200:
+            link = "%s%s" % (self.confluence_api_url, response.data["_links"]["webui"])
             LOGGER.info("Page updated successfully.")
             LOGGER.info("URL: %s", link)
             return True
@@ -116,18 +149,15 @@ class ConfluenceApiClient:
 
         response = self.check_errors_and_get_json(self.get_session().get(url))
 
-        if response["status_code"] == 404:
-            LOGGER.error("Error: Space not found. Check the following are correct:")
-            LOGGER.error("\tSpace Key : %s", self.space_key)
-            LOGGER.error("\tURL: %s", self.confluence_api_url)
+        if response.status_code == 404:
+            self.log_not_found("Space", {"Space Key": self.space_key})
         else:
-            data = response["data"]
-            if len(data["results"]) >= 1:
-                self.space_id = int(data["results"][0]["id"])
+            if len(response.data["results"]) >= 1:
+                self.space_id = int(response.data["results"][0]["id"])
 
         return self.space_id
 
-    def create_page(self, title, body, parent_id):
+    def create_page(self, title: str, body: str, parent_id):
         """
         Create a new page
 
@@ -161,8 +191,8 @@ class ConfluenceApiClient:
             self.get_session().post(url, data=json.dumps(new_page))
         )
 
-        if response["status_code"] == 200:
-            data = response["data"]
+        if response.status_code == 200:
+            data = response.data
             space_id = int(data["spaceId"])
             page_id = int(data["id"])
             version = data["version"]["number"]
@@ -171,10 +201,7 @@ class ConfluenceApiClient:
             LOGGER.info("Page created in SpaceId %d with ID: %d.", space_id, page_id)
             LOGGER.info("URL: %s", link)
 
-            page_info = collections.namedtuple(
-                "PageInfo", ["id", "spaceId", "version", "link"]
-            )
-            return page_info(page_id, space_id, version, link)
+            return PageInfo(page_id, space_id, version, link)
         else:
             LOGGER.error("Could not create page.")
             return {"id": 0, "spaceId": 0, "version": ""}
@@ -197,11 +224,11 @@ class ConfluenceApiClient:
         else:
             LOGGER.error("Page %d could not be deleted.", page_id)
 
-    def get_page(self, title):
+    def get_page(self, title: str):
         """
         Retrieve page details by title
 
-        :param title: page tile
+        :param title: page title
         :return: Confluence page info
         """
 
@@ -215,12 +242,10 @@ class ConfluenceApiClient:
         )
 
         response = self.check_errors_and_get_json(self.get_session(retry=True).get(url))
-        if response["status_code"] == 404:
-            LOGGER.error("Error: Page not found. Check the following are correct:")
-            LOGGER.error("\tSpace Id : %d", space_id)
-            LOGGER.error("\tURL: %s", self.confluence_api_url)
+        if response.status_code == 404:
+            self.log_not_found("Page", {"Space Id": "%d" % space_id})
         else:
-            data = response["data"]
+            data = response.data
 
             LOGGER.debug("data: %s", str(data))
 
@@ -233,10 +258,7 @@ class ConfluenceApiClient:
                     data["results"][0]["_links"]["webui"],
                 )
 
-                page_info = collections.namedtuple(
-                    "PageInfo", ["id", "spaceId", "version", "link"]
-                )
-                page = page_info(page_id, space_id, version_num, link)
+                page = PageInfo(page_id, space_id, version_num, link)
                 return page
 
         return False
@@ -253,15 +275,10 @@ class ConfluenceApiClient:
         url = "%s/api/v2/pages/%d/properties" % (self.confluence_api_url, page_id)
 
         response = self.check_errors_and_get_json(self.get_session(retry=True).get(url))
-        if response["status_code"] == 404:
-            LOGGER.error("Error: Page not found. Check the following are correct:")
-            LOGGER.error("\tPage Id : %d", page_id)
-            LOGGER.error("\tURL: %s", self.confluence_api_url)
+        if response.status_code == 404:
+            self.log_not_found("Page Properties", {"Page Id": "%d" % page_id})
         else:
-            data = response["data"]
-            LOGGER.debug("property data: %s", str(data["results"]))
-
-            return data["results"]
+            return response.data["results"]
 
         return []
 
@@ -309,10 +326,10 @@ class ConfluenceApiClient:
                 self.get_session(retry=True).post(url, data=json.dumps(property_json))
             )
 
-        if response["status_code"] != 200:
-            LOGGER.error("Error: Page not found. Check the following are correct:")
-            LOGGER.error("\tPage Id : %d", page_id)
-            LOGGER.error("\tURL: %s", self.confluence_api_url)
+        if response.status_code != 200:
+            LOGGER.error(
+                "Unable to add property %s to page %d", property_json["key"], page_id
+            )
             return False
         else:
             return True
@@ -406,14 +423,11 @@ class ConfluenceApiClient:
 
         response = self.check_errors_and_get_json(self.get_session().get(url))
 
-        label_info = collections.namedtuple(
-            "LabelInfo", ["id", "name", "prefix", "label"]
-        )
-        data = response["data"]["label"]
+        data = response.data["label"]
         if response["status_code"] == 404:
-            label = label_info(0, "", "", "")
+            label = LabelInfo(0, "", "", "")
         else:
-            label = label_info(
+            label = LabelInfo(
                 int(data["id"]),
                 data["name"],
                 data["prefix"],
@@ -450,7 +464,7 @@ class ConfluenceApiClient:
         url = "%s/api/v2/pages/%d/labels" % (self.confluence_api_url, page_id)
 
         response = self.check_errors_and_get_json(self.get_session(retry=True).get(url))
-        if response["status_code"] == 404:
+        if response.status_code == 404:
             LOGGER.error(
                 "Error: Error finding existing labels. Check the following are correct:"
             )
@@ -458,7 +472,7 @@ class ConfluenceApiClient:
             LOGGER.error("\tURL: %s", self.confluence_api_url)
             return False
 
-        data = response["data"]
+        data = response.data
         for label in labels:
             found = False
             for existing_label in data["results"]:
