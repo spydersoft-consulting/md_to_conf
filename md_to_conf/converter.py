@@ -269,6 +269,66 @@ class MarkdownConverter:
         slug_string = re.sub(r"[^a-zA-Z0-9-]", "", slug_string)
         return slug_string
 
+    def process_headers(self, ref_prefix, ref_postfix, headers):
+        headers_map = {}
+        headers_count = {}
+
+        for header in headers:
+            key = ref_prefix + self.slug(header, True)
+
+            if self.editor_version == 1:
+                value = re.sub(r"(<.+>| )", "", header)
+            if self.editor_version == 2:
+                value = self.slug(header, False)
+
+            if key in headers_map:
+                alt_count = headers_count[key]
+
+                alt_key = key + (ref_postfix % alt_count)
+                alt_value = value + (".%s" % alt_count)
+
+                headers_map[alt_key] = alt_value
+                headers_count[key] = alt_count + 1
+            else:
+                headers_map[key] = value
+                headers_count[key] = 1
+
+        return headers_map
+
+    def process_links(
+        self, links, headers_map, space_id: int, page_id: int, title: str
+    ):
+        for link in links:
+            matches = re.search(r'<a href="(#.+?)">(.+?)</a>', link)
+            ref = matches.group(1)
+            alt = matches.group(2)
+
+            result_ref = headers_map.get(ref)
+
+            if result_ref:
+                base_uri = "%s/spaces/%d/pages/%d/%s" % (
+                    self.api_url,
+                    space_id,
+                    page_id,
+                    "+".join(title.split()),
+                )
+                if self.editor_version == 1:
+                    replacement = (
+                        '<ac:link ac:anchor="%s">'
+                        "<ac:plain-text-link-body>"
+                        "<![CDATA[%s]]></ac:plain-text-link-body></ac:link>"
+                        % (result_ref, re.sub(r"( *<.+> *)", " ", alt))
+                    )
+                if self.editor_version == 2:
+                    replacement_uri = "%s#%s" % (base_uri, result_ref)
+                    replacement = '<a href="%s" title="%s">%s</a>' % (
+                        replacement_uri,
+                        alt,
+                        alt,
+                    )
+
+                html = html.replace(link, replacement)
+
     def process_refs(self, html):
         """
         Process references

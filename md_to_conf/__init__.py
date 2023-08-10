@@ -275,64 +275,14 @@ def add_local_refs(page_id: int, space_id: int, title, html, converter):
     if not headers:
         return html
 
-    headers_map = {}
-    headers_count = {}
-
-    for header in headers:
-        key = ref_prefix + converter.slug(header, True)
-
-        if VERSION == 1:
-            value = re.sub(r"(<.+?>| )", "", header)
-        if VERSION == 2:
-            value = converter.slug(header, False)
-
-        if key in headers_map:
-            alt_count = headers_count[key]
-
-            alt_key = key + (ref_postfix % alt_count)
-            alt_value = value + (".%s" % alt_count)
-
-            headers_map[alt_key] = alt_value
-            headers_count[key] = alt_count + 1
-        else:
-            headers_map[key] = value
-            headers_count[key] = 1
+    headers_map = converter.process_headers(ref_prefix, ref_postfix, headers, VERSION)
 
     links = re.findall(r'<a href="#.+?">.+?</a>', html)
 
     if not links:
         return html
 
-    for link in links:
-        matches = re.search(r'<a href="(#.+?)">(.+?)</a>', link)
-        ref = matches.group(1)
-        alt = matches.group(2)
-
-        result_ref = headers_map.get(ref)
-
-        if result_ref:
-            base_uri = "%s/spaces/%d/pages/%d/%s" % (
-                CONFLUENCE_API_URL,
-                space_id,
-                page_id,
-                "+".join(title.split()),
-            )
-            if VERSION == 1:
-                replacement = (
-                    '<ac:link ac:anchor="%s">'
-                    "<ac:plain-text-link-body>"
-                    "<![CDATA[%s]]></ac:plain-text-link-body></ac:link>"
-                    % (result_ref, re.sub(r"( *<.+?> *)", " ", alt))
-                )
-            if VERSION == 2:
-                replacement_uri = "%s#%s" % (base_uri, result_ref)
-                replacement = '<a href="%s" title="%s">%s</a>' % (
-                    replacement_uri,
-                    alt,
-                    alt,
-                )
-
-            html = html.replace(link, replacement)
+    html = converter.process_links(links, headers_map, space_id, page_id, title)
 
     return html
 
@@ -362,7 +312,7 @@ def get_properties_to_update(client, page_id: int):
 
     if not PROPERTIES:
         return properties_for_update
-    
+
     for key in PROPERTIES:
         found = False
         for existing_prop in properties:
@@ -434,6 +384,8 @@ def main():
         client.delete_page(page.id)
         sys.exit(1)
 
+    parent_page_id = 0
+
     if ANCESTOR:
         parent_page = client.get_page(ANCESTOR)
         if parent_page:
@@ -441,14 +393,9 @@ def main():
         else:
             LOGGER.error("Error: Parent page does not exist: %s", ANCESTOR)
             sys.exit(1)
-    else:
-        parent_page_id = 0
 
     if not page:
         page = client.create_page(title, html, parent_page_id)
-
-    if ATTACHMENTS:
-        add_attachments(page.id, ATTACHMENTS, client)
 
     html = add_images(page.id, html, client)
     # Add local references
@@ -457,7 +404,7 @@ def main():
     client.update_page(page.id, title, html, page.version, parent_page_id)
 
     properties_for_update = get_properties_to_update(client, page.id)
-    if properties_for_update and len(properties_for_update) > 0:
+    if len(properties_for_update) > 0:
         LOGGER.info(
             "Updating %s page content properties..." % len(properties_for_update)
         )
@@ -467,6 +414,9 @@ def main():
 
     if LABELS:
         client.update_labels(page.id, LABELS)
+
+    if ATTACHMENTS:
+        add_attachments(page.id, ATTACHMENTS, client)
 
     LOGGER.info("Markdown Converter completed successfully.")
 
