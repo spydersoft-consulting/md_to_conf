@@ -275,7 +275,7 @@ def add_local_refs(page_id: int, space_id: int, title, html, converter):
     if not headers:
         return html
 
-    headers_map = converter.process_headers(ref_prefix, ref_postfix, headers, VERSION)
+    headers_map = converter.process_headers(ref_prefix, ref_postfix, headers)
 
     links = re.findall(r'<a href="#.+?">.+?</a>', html)
 

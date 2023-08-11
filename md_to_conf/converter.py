@@ -37,6 +37,7 @@ class MarkdownConverter:
             html = self.add_contents(html)
 
         html = self.process_refs(html)
+
         return html
 
     def convert_comment_block(self, html):
@@ -59,7 +60,7 @@ class MarkdownConverter:
         :param html: string
         :return: modified html string
         """
-        html = str.replace(
+        html = re.sub(
             r"<p>\[TOC\]</p>",
             '<p><ac:structured-macro ac:name="toc" ac:schema-version="1"/></p>',
             html,
@@ -328,7 +329,8 @@ class MarkdownConverter:
                     )
 
                 html = html.replace(link, replacement)
-                return html
+
+        return html
 
     def process_refs(self, html):
         """
