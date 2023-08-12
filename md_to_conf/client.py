@@ -3,7 +3,7 @@ import sys
 import os
 import re
 import json
-import collections
+import typing
 import mimetypes
 import urllib
 import requests
@@ -11,23 +11,79 @@ import requests
 LOGGER = logging.getLogger(__name__)
 
 
-CheckedResponse = collections.namedtuple("CheckedResponse", ["status_code", "data"])
+class CheckedResponse(typing.NamedTuple):
+    """
+    NamedTuple containing page information
 
-PageInfo = collections.namedtuple("PageInfo", ["id", "spaceId", "version", "link"])
+    """
 
-LabelInfo = collections.namedtuple("LabelInfo", ["id", "name", "prefix", "label"])
+    status_code: int
+    """ Page Id """
+
+    data: any
+    """ Generic object from JSON response """
+
+
+class PageInfo(typing.NamedTuple):
+    """
+    NamedTuple containing page information
+
+    """
+
+    id: int
+    """ Page Id """
+
+    spaceId: int
+    """ Space Id """
+
+    version: int
+    """ Page Version """
+
+    link: str
+    """ Page Link """
+
+
+class LabelInfo(typing.NamedTuple):
+    """
+    NamedTuple containing label information
+
+    """
+
+    id: int
+    """ Label Id """
+
+    name: str
+    """ The name of the label """
+
+    prefix: str
+    """ The prefix of the label """
+
+    label: str
+    """ The translated label """
 
 
 class ConfluenceApiClient:
     def __init__(
         self,
-        confluence_api_url,
-        username,
-        api_key,
-        space_key,
-        editor_version,
-        use_ssl=True,
+        confluence_api_url: str,
+        username: str,
+        api_key: str,
+        space_key: str,
+        editor_version: int,
+        use_ssl: bool = True,
     ):
+        """
+        Constructor
+
+        Args:
+            username:  The Confluence user name associated with the API key
+            api_key: The API key to access Confluence
+            confluence_api_url: The URL to the Confluence site
+            space_key: The Key value for the Space for publishing
+            editor_version: The editor version for page publishing
+            use_ssl:  Whether or not to use SSL.
+
+        """
         self.user_name = username
         self.api_key = api_key
         self.confluence_api_url = confluence_api_url
@@ -36,13 +92,15 @@ class ConfluenceApiClient:
         self.editor_version = editor_version
         self.use_ssl = use_ssl
 
-    def get_session(self, retry=False, json=True):
+    def get_session(self, retry: bool = False, json: bool = True) -> requests.Session:
         """
         Retrieve a `requests` session object
 
-        :param retry: Configure the request with a retry adapter.
-        :param json: Configure the request to set Content-Type to 'application/json'
-        :return: A session from the `requests` module
+        Args:
+            retry: Configure the request with a retry adapter.
+            json: Configure the request to set Content-Type to 'application/json'
+        Returns:
+            requests.Session: A session from the `requests` module
 
         """
         session = requests.Session()
@@ -72,9 +130,9 @@ class ConfluenceApiClient:
         """
         Write a "not found" message to the LOGGER
 
-        :param object_name: str : The name to show in the log message
-        :param log_values: Additional key/value pairs to log
-        :return: nothing
+        Args:
+            object_name: The name to show in the log message
+            log_values: Additional key/value pairs to log
 
         """
         LOGGER.error("%s not found." % object_name)
@@ -83,12 +141,12 @@ class ConfluenceApiClient:
         for log_value in log_values:
             LOGGER.error("\t%s: %s" % log_value.key, log_value.value)
 
-    def check_errors_and_get_json(self, response: requests.Response):
+    def check_errors_and_get_json(self, response: requests.Response) -> CheckedResponse:
         """
         Check the response for error codes
 
-        :param response: requests.Response : The response from a request
-        :return:
+        Args:
+            response : The response from a request
 
         """
         try:
@@ -103,17 +161,18 @@ class ConfluenceApiClient:
 
         return CheckedResponse(response.status_code, response.json())
 
-    def update_page(self, page_id: int, title: str, body: str, version: int, parent_id):
+    def update_page(
+        self, page_id: int, title: str, body: str, version: int, parent_id: int
+    ):
         """
         Update a page
 
-        :param page_id: confluence page id
-        :param title: confluence page title
-        :param body: confluence page content
-        :param version: confluence page version
-        :param parent_id: confluence parentId
-        :param attachments: confluence page attachments
-        :return: None
+        Args:
+            page_id: confluence page id
+            title: confluence page title
+            body: confluence page content
+            version: confluence page version
+            parent_id: confluence parentId
         """
         LOGGER.info("Updating page...")
 
@@ -147,9 +206,12 @@ class ConfluenceApiClient:
         else:
             LOGGER.error("Page could not be updated.")
 
-    def get_space_id(self):
+    def get_space_id(self) -> int:
         """
         Retrieve the integer space ID for the current self.space_key
+
+        Returns:
+            The integer ID for the space_key of this instance
 
         """
         if self.space_id > -1:
@@ -167,14 +229,17 @@ class ConfluenceApiClient:
 
         return self.space_id
 
-    def create_page(self, title: str, body: str, parent_id):
+    def create_page(self, title: str, body: str, parent_id: int) -> PageInfo:
         """
         Create a new page
 
-        :param title: confluence page title
-        :param body: confluence page content
-        :param parent_id: confluence parentId
-        :return:
+        Args:
+            title: confluence page title
+            body: confluence page content
+            parent_id: confluence parentId
+
+        Returns:
+            PageInfo: A num
         """
         LOGGER.info("Creating page...")
 
@@ -220,8 +285,8 @@ class ConfluenceApiClient:
         """
         Delete a page
 
-        :param page_id: confluence page id
-        :return: None
+        Args:
+            page_id: confluence page id
         """
         LOGGER.info("Deleting page...")
         url = "%s/api/v2/pages/%d" % (self.confluence_api_url, page_id)
@@ -234,12 +299,14 @@ class ConfluenceApiClient:
         else:
             LOGGER.error("Page %d could not be deleted.", page_id)
 
-    def get_page(self, title: str):
+    def get_page(self, title: str) -> PageInfo:
         """
         Retrieve page details by title
 
-        :param title: page title
-        :return: Confluence page info
+        Args:
+            title: page title
+        Returns:
+            Confluence page info
         """
 
         space_id = self.get_space_id()
@@ -271,14 +338,16 @@ class ConfluenceApiClient:
                 page = PageInfo(page_id, space_id, version_num, link)
                 return page
 
-        return False
+        return PageInfo(0, 0, 0, "")
 
-    def get_page_properties(self, page_id: int):
+    def get_page_properties(self, page_id: int) -> typing.List[typing.Any]:
         """
         Retrieve page properties by page id
 
-        :param page_id: pageId
-        :return: Page Properties Collection
+        Args:
+            page_id: pageId
+        Returns:
+            Page Properties Collection
         """
 
         LOGGER.info("\tRetrieving page property information: %d", page_id)
@@ -292,12 +361,14 @@ class ConfluenceApiClient:
 
         return []
 
-    def update_page_property(self, page_id: int, page_property):
+    def update_page_property(self, page_id: int, page_property) -> bool:
         """
         Update page property by page id
 
-        :param page_id: pageId
-        :return: True if successful
+        Args:
+            page_id: pageId
+        Returns:
+            True if successful
         """
 
         property_json = {
@@ -344,13 +415,15 @@ class ConfluenceApiClient:
         else:
             return True
 
-    def get_attachment(self, page_id: int, filename):
+    def get_attachment(self, page_id: int, filename: str) -> str:
         """
         Get page attachment
 
-        :param page_id: confluence page id
-        :param filename: attachment filename
-        :return: attachment info in case of success, False otherwise
+        Args:
+            page_id: confluence page id
+            filename: attachment filename
+        Returns:
+            The attachment Id, or -1 if not found
         """
         url = "%s/api/v2/pages/%d/attachments?filename=%s" % (
             self.confluence_api_url,
@@ -364,22 +437,22 @@ class ConfluenceApiClient:
 
         if len(data["results"]) >= 1:
             att_id = data["results"][0]["id"]
-            att_info = collections.namedtuple("AttachmentInfo", ["id"])
-            attr_info = att_info(att_id)
-            return attr_info
+            return att_id
 
-        return False
+        return ""
 
-    def upload_attachment(self, page_id: int, file, comment):
+    def upload_attachment(self, page_id: int, file: str, comment: str) -> bool:
         """
         Upload an attachement
 
-        :param page_id: confluence page id
-        :param file: attachment file
-        :param comment: attachment comment
-        :return: boolean
+        Args:
+            page_id: confluence page id
+            file: attachment file
+            comment: attachment comment
+        Returns:
+            True if successful, false otherwise
         """
-        if re.search("http.*", file):
+        if re.search(r"http.*", file):
             return False
 
         content_type = mimetypes.guess_type(file)[0]
@@ -394,12 +467,12 @@ class ConfluenceApiClient:
             "file": (filename, open(file, "rb"), content_type, {"Expires": "0"}),
         }
 
-        attachment = self.get_attachment(page_id, filename)
-        if attachment:
+        attachment_id = self.get_attachment(page_id, filename)
+        if attachment_id != "":
             url = "%s/rest/api/content/%d/child/attachment/%s/data" % (
                 self.confluence_api_url,
                 page_id,
-                attachment.id,
+                attachment_id,
             )
         else:
             url = "%s/rest/api/content/%d/child/attachment/" % (
@@ -417,12 +490,14 @@ class ConfluenceApiClient:
 
         return True
 
-    def get_label_info(self, label_name: str):
+    def get_label_info(self, label_name: str) -> LabelInfo:
         """
         Get label information for the given label name
 
-        :param label_name: pageId
-        :return: LabelInfo.  If not found, labelInfo will be 0
+        Args:
+            label_name: pageId
+        Returns:
+            LabelInfo.  If not found, labelInfo will be 0
         """
 
         LOGGER.debug("\tRetrieving label information: %s", label_name)
@@ -446,7 +521,16 @@ class ConfluenceApiClient:
 
         return label
 
-    def add_label(self, page_id: int, label_name: str):
+    def add_label(self, page_id: int, label_name: str) -> bool:
+        """
+        Add the given lable to the given page Id
+
+        Args:
+            page_id: pageId
+            label_name: label to be added
+        Returns:
+            True if successful
+        """
         label_info = self.get_label_info(label_name)
         if label_info.id > 0:
             prefix = label_info.prefix
@@ -461,13 +545,15 @@ class ConfluenceApiClient:
         response.raise_for_status()
         return True
 
-    def update_labels(self, page_id: int, labels):
+    def update_labels(self, page_id: int, labels: typing.List[str]) -> bool:
         """
         Update labels on given page Id
 
-        :param page_id: pageId
-        :param labels: labels to be added
-        :return: True if successful
+        Args:
+            page_id: pageId
+            labels: labels to be added
+        Returns:
+            True if successful
         """
 
         LOGGER.info("\tRetrieving page property information: %d", page_id)

@@ -1,14 +1,4 @@
 #!/usr/bin/env python3
-"""
-# Spydersoft Markdown to Confluence Tool
-# --------------------------------------------------------------------------------------------------
-# Based on Rittman Mead Markdown to Confluence Tool
-# --------------------------------------------------------------------------------------------------
-# Create or Update Atlas pages remotely using markdown files.
-#
-# --------------------------------------------------------------------------------------------------
-"""
-
 import logging
 import sys
 import os
@@ -221,13 +211,13 @@ def add_images(page_id: int, html, client):
     """
     source_folder = os.path.dirname(os.path.abspath(MARKDOWN_FILE))
 
-    for tag in re.findall("<img(.*?)\/>", html):
-        rel_path = re.search('src="(.*?)"', tag).group(1)
-        alt_text = re.search('alt="(.*?)"', tag).group(1)
+    for tag in re.findall(r"<img(.*?)\/>", html):
+        rel_path = re.search(r'src="(.*?)"', tag).group(1)
+        alt_text = re.search(r'alt="(.*?)"', tag).group(1)
         abs_path = os.path.join(source_folder, rel_path)
         basename = os.path.basename(rel_path)
         client.upload_attachment(page_id, abs_path, alt_text)
-        if re.search("http.*", rel_path) is None:
+        if re.search(r"http.*", rel_path) is None:
             if CONFLUENCE_API_URL.endswith("/wiki"):
                 html = html.replace(
                     "%s" % (rel_path),
@@ -394,8 +384,10 @@ def main():
             LOGGER.error("Error: Parent page does not exist: %s", ANCESTOR)
             sys.exit(1)
 
-    if not page:
+    if page.id == 0:
         page = client.create_page(title, html, parent_page_id)
+
+    LOGGER.info("Page Id %d" % page.id)
 
     html = add_images(page.id, html, client)
     # Add local references

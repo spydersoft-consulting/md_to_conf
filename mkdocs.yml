@@ -1,0 +1,22 @@
+site_name: Markdown to Confluence
+site_url: https://spyder007.github.io/md_to_conf/
+
+
+nav:
+  - Home: 'index.md'
+  # - 'getting-started.md'
+  - Contribute: 'contributing.md'
+  - 'API Documentation':
+    - 'api/client-reference.md'
+    - 'api/converter-reference.md'
+    - 'api/main-reference.md'
+  #   - 'api/statuspage_io-reference.md'
+  #   - 'api/statuspage_io_client-reference.md'
+  #   - 'api/enums.md'
+
+theme:
+  name: 'material'
+
+plugins:
+  - search
+  - mkdocstrings

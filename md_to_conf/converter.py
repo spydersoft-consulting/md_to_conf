@@ -2,20 +2,51 @@ import logging
 import re
 import codecs
 import markdown
+import typing
 
 LOGGER = logging.getLogger(__name__)
 
 
 class MarkdownConverter:
-    def __init__(self, md_file, api_url, md_source, editor_version):
+    """
+    Wrapper for the `markdown` module that converts Markdown into HTML
+
+    Provides some additional functions for advanced HTML processing
+
+    """
+
+    def __init__(self, md_file: str, api_url: str, md_source: str, editor_version: int):
+        """
+        Constructor
+
+        Args:
+            md_file: Path the the Markdown file
+            api_url: Path the the Confluence API, used to build link urls
+            md_source: MD Source format: current choices are `default` and `bitbucket`
+            editor_version: Version to use for the editor
+        """
         self.md_file = md_file
         self.api_url = api_url
         self.md_source = md_source
         self.editor_version = editor_version
 
     def get_html_from_markdown(
-        self, has_title=False, remove_emojies=False, add_contents=False
-    ):
+        self,
+        has_title: bool = False,
+        remove_emojies: bool = False,
+        add_contents: bool = False,
+    ) -> str:
+        """
+        Convert the Markdown file to HTML
+
+        Args:
+            has_title: Was a title provided via the CLI?
+            remove_emojies: Should emojies be removed?
+            add_contents: Should a contents section be added to the page
+
+        Returns:
+            A string representing HTML for the Markdown page
+        """
         with codecs.open(self.md_file, "r", "utf-8") as mdfile:
             markdown_content = mdfile.read()
             html = markdown.markdown(
@@ -40,25 +71,29 @@ class MarkdownConverter:
 
         return html
 
-    def convert_comment_block(self, html):
+    def convert_comment_block(self, html: str) -> str:
         """
         Convert markdown code bloc to Confluence hidden comment
 
-        :param html: string
-        :return: modified html string
+        Args:
+            html: string
+        Returns:
+            modified html string
         """
         open_tag = "<ac:placeholder>"
         close_tag = "</ac:placeholder>"
         html = html.replace("<!--", open_tag).replace("-->", close_tag)
         return html
 
-    def create_table_of_content(self, html):
+    def create_table_of_content(self, html: str) -> str:
         """
         Check for the string '[TOC]' and replaces it the
         Confluence "Table of Content" macro
 
-        :param html: string
-        :return: modified html string
+        Args:
+            html: string
+        Returns:
+            modified html string
         """
         html = re.sub(
             r"<p>\[TOC\]</p>",
@@ -69,12 +104,14 @@ class MarkdownConverter:
 
         return html
 
-    def convert_code_block(self, html):
+    def convert_code_block(self, html: str) -> str:
         """
         Convert html code blocks to Confluence macros
 
-        :param html: string
-        :return: modified html string
+        Args:
+            html: string
+        Returns:
+            modified html string
         """
         code_blocks = re.findall(r"<pre><code.*?>.*?</code></pre>", html, re.DOTALL)
         if code_blocks:
@@ -115,12 +152,14 @@ class MarkdownConverter:
 
         return html
 
-    def remove_emojies(self, html):
+    def remove_emojies(self, html: str) -> str:
         """
         Remove emojies if there are any
 
-        :param html: string
-        :return: modified html string
+        Args:
+            html: string
+        Returns:
+            modified html string
         """
         regrex_pattern = re.compile(
             pattern="["
@@ -133,12 +172,14 @@ class MarkdownConverter:
         )
         return regrex_pattern.sub(r"", html)
 
-    def convert_info_macros(self, html):
+    def convert_info_macros(self, html: str) -> str:
         """
         Converts html for info, note or warning macros
 
-        :param html: html string
-        :return: modified html string
+        Args:
+            html: html string
+        Returns:
+            modified html string
         """
         info_tag = '<p><ac:structured-macro ac:name="info"><ac:rich-text-body><p>'
         note_tag = info_tag.replace("info", "note")
@@ -185,12 +226,14 @@ class MarkdownConverter:
 
         return html
 
-    def convert_doctoc(self, html):
+    def convert_doctoc(self, html: str) -> str:
         """
         Convert doctoc to confluence macro
 
-        :param html: html string
-        :return: modified html string
+        Args:
+            html: html string
+        Returns:
+            modified html string
         """
 
         toc_tag = """<p>
@@ -206,51 +249,57 @@ class MarkdownConverter:
         </p>"""
 
         html = re.sub(
-            "\<\!\-\- START doctoc.*END doctoc \-\-\>", toc_tag, html, flags=re.DOTALL
+            r"\<\!\-\- START doctoc.*END doctoc \-\-\>", toc_tag, html, flags=re.DOTALL
         )
 
         return html
 
-    def strip_type(self, tag, tagtype):
+    def strip_type(self, tag: str, tagtype: str) -> str:
         """
         Strips Note or Warning tags from html in various formats
 
-        :param tag: tag name
-        :param tagtype: tag type
-        :return: modified tag
+        Args:
+            tag: tag name
+            tagtype: tag type
+        Returns:
+            modified tag
         """
-        tag = re.sub("%s:\s" % tagtype, "", tag.strip(), re.IGNORECASE)
-        tag = re.sub("%s\s:\s" % tagtype, "", tag.strip(), re.IGNORECASE)
-        tag = re.sub("<.*?>%s:\s<.*?>" % tagtype, "", tag, re.IGNORECASE)
-        tag = re.sub("<.*?>%s\s:\s<.*?>" % tagtype, "", tag, re.IGNORECASE)
-        tag = re.sub("<(em|strong)>%s:<.*?>\s" % tagtype, "", tag, re.IGNORECASE)
-        tag = re.sub("<(em|strong)>%s\s:<.*?>\s" % tagtype, "", tag, re.IGNORECASE)
-        tag = re.sub("<(em|strong)>%s<.*?>:\s" % tagtype, "", tag, re.IGNORECASE)
-        tag = re.sub("<(em|strong)>%s\s<.*?>:\s" % tagtype, "", tag, re.IGNORECASE)
+        tag = re.sub(r"%s:\s" % tagtype, "", tag.strip(), re.IGNORECASE)
+        tag = re.sub(r"%s\s:\s" % tagtype, "", tag.strip(), re.IGNORECASE)
+        tag = re.sub(r"<.*?>%s:\s<.*?>" % tagtype, "", tag, re.IGNORECASE)
+        tag = re.sub(r"<.*?>%s\s:\s<.*?>" % tagtype, "", tag, re.IGNORECASE)
+        tag = re.sub(r"<(em|strong)>%s:<.*?>\s" % tagtype, "", tag, re.IGNORECASE)
+        tag = re.sub(r"<(em|strong)>%s\s:<.*?>\s" % tagtype, "", tag, re.IGNORECASE)
+        tag = re.sub(r"<(em|strong)>%s<.*?>:\s" % tagtype, "", tag, re.IGNORECASE)
+        tag = re.sub(r"<(em|strong)>%s\s<.*?>:\s" % tagtype, "", tag, re.IGNORECASE)
         string_start = re.search("<[^>]*>", tag)
         tag = self.upper_chars(tag, [string_start.end()])
         return tag
 
-    def upper_chars(self, string, indices):
+    def upper_chars(self, string: str, indices: typing.List[int]) -> str:
         """
         Make characters uppercase in string
 
-        :param string: string to modify
-        :param indices: character indice to change to uppercase
-        :return: uppercased string
+        Args:
+            string: string to modify
+            indices: character indice to change to uppercase
+        Returns:
+            uppercased string
         """
         upper_string = "".join(
             c.upper() if i in indices else c for i, c in enumerate(string)
         )
         return upper_string
 
-    def slug(self, string, lowercase):
+    def slug(self, string: str, lowercase: bool) -> str:
         """
         Creates a slug string
 
-        :param string: string to modify
-        :param lowercase: bool indicating whether string has to be lowercased
-        :return: slug string
+        Args:
+            string: string to modify
+            lowercase: bool indicating whether string has to be lowercased
+        Returns:
+            slug string
         """
 
         slug_string = string
@@ -332,14 +381,16 @@ class MarkdownConverter:
 
         return html
 
-    def process_refs(self, html):
+    def process_refs(self, html: str) -> str:
         """
         Process references
 
-        :param html: html string
-        :return: modified html string
+        Args:
+            html: html string
+        Returns:
+            modified html string
         """
-        refs = re.findall("\n(\[\^(\d)\].*)|<p>(\[\^(\d)\].*)", html)
+        refs = re.findall(r"\n(\[\^(\d)\].*)|<p>(\[\^(\d)\].*)", html)
 
         if refs:
             for ref in refs:
@@ -364,12 +415,14 @@ class MarkdownConverter:
 
     # Scan for images and upload as attachments if found
 
-    def add_contents(self, html):
+    def add_contents(self, html: str) -> str:
         """
         Add contents page
 
-        :param html: html string
-        :return: modified html string
+        Args:
+            html: html string
+        Returns:
+            modified html string
         """
         contents_markup = (
             '<ac:structured-macro ac:name="toc">\n<ac:parameter ac:name="printable">'

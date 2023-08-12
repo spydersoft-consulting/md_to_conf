@@ -1,7 +1,7 @@
 # Contribution Guidelines
 
 
-## Virtual Development Environment
+## Environment Configuration
 
 It is recommended that you use a virtual environment for development.
 
@@ -14,7 +14,7 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-### Anaconda 
+### Anaconda
 
 [Installation Guide](https://conda.io/projects/conda/en/latest/user-guide/install/download.html)
 
@@ -31,6 +31,9 @@ Install the requirements for the application:
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
 ```
+
+
+## Install the Module
 
 Install the module in an editable mode:
 
