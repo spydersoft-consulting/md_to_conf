@@ -16,9 +16,11 @@ The file is converted to HTML and uploaded to Confluence using their `storage` r
 3. Some custom markdown tags
 
 ## Usage
-Please see the [Getting Started](https://spyder007.github.com/md_to_conf/getting-started/) documentation for information on using this tool.
+Please see the [Getting Started](https://spyder007.github.io/md_to_conf/getting-started/) documentation for information on using this tool.
 
 ## Contributing
-Please see the [Contribute](https://spyder007.github.com/md_to_conf/contributing/) section of the documentation for information on development and contribution guidelines.
+Please see the [Contribute](https://spyder007.github.io/md_to_conf/contributing/) section of the documentation for information on development and contribution guidelines.
 
 ## Change Log
+
+[Change Log](https://spyder007.github.io/md_to_conf/changes/)

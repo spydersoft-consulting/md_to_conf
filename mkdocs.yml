@@ -6,6 +6,7 @@ nav:
   - Home: 'index.md'
   - 'getting-started.md'
   - Contribute: 'contributing.md'
+  - Changes: 'CHANGELOG.md'
   - 'API Documentation':
     - 'api/client-reference.md'
     - 'api/converter-reference.md'
