@@ -4,7 +4,7 @@ site_url: https://spyder007.github.io/md_to_conf/
 
 nav:
   - Home: 'index.md'
-  # - 'getting-started.md'
+  - 'getting-started.md'
   - Contribute: 'contributing.md'
   - 'API Documentation':
     - 'api/client-reference.md'

@@ -4,6 +4,7 @@ import sys
 import os
 import re
 import argparse
+import typing
 from .client import ConfluenceApiClient
 from .converter import MarkdownConverter
 
@@ -186,13 +187,13 @@ except Exception as err:
     sys.exit(1)
 
 
-def add_attachments(page_id: int, files, client):
+def add_attachments(page_id: int, files: typing.List[str], client: ConfluenceApiClient):
     """
     Add attachments for an array of files
 
-    :param page_id: Confluence page id
-    :param files: list of files to attach to the given Confluence page
-    :return: None
+    Args:
+        page_id: Confluence page id
+        files: list of files to attach to the given Confluence page
     """
     source_folder = os.path.dirname(os.path.abspath(MARKDOWN_FILE))
 
@@ -201,13 +202,15 @@ def add_attachments(page_id: int, files, client):
             client.upload_attachment(page_id, os.path.join(source_folder, file), "")
 
 
-def add_images(page_id: int, html, client):
+def add_images(page_id: int, html: str, client: ConfluenceApiClient) -> str:
     """
     Scan for images and upload as attachments if found
 
-    :param page_id: Confluence page id
-    :param html: html string
-    :return: html with modified image reference
+    Args:
+        page_id: Confluence page id
+        html: html string
+    Returns:
+        html with modified image reference
     """
     source_folder = os.path.dirname(os.path.abspath(MARKDOWN_FILE))
 
@@ -231,14 +234,20 @@ def add_images(page_id: int, html, client):
     return html
 
 
-def add_local_refs(page_id: int, space_id: int, title, html, converter):
+def add_local_refs(
+    page_id: int, space_id: int, title: str, html: str, converter: MarkdownConverter
+) -> str:
     """
     Convert local links to correct confluence local links
 
-    :param page_title: string
-    :param page_id: integer
-    :param html: string
-    :return: modified html string
+    Args:
+        page_id: Page ID
+        space_id: Space ID
+        title: Page Title
+        html: string representing page HTML
+        converter: an instance of the MarkdownConverter for this page
+    Returns:
+        modified html string
     """
 
     ref_prefixes = {"default": "#", "bitbucket": "#markdown-header-"}
@@ -277,12 +286,14 @@ def add_local_refs(page_id: int, space_id: int, title, html, converter):
     return html
 
 
-def get_properties_to_update(client, page_id: int):
+def get_properties_to_update(client, page_id: int) -> typing.List[any]:
     """
     Get a list of properties which have changed
 
-    :param page_id: integer
-    :return: array of properties to update
+    Args:
+        page_id: integer
+    Returns:
+        array of properties to update
     """
     properties = client.get_page_properties(page_id)
     properties_for_update = []
@@ -328,7 +339,6 @@ def main():
     """
     Main program
 
-    :return:
     """
 
     LOGGER.info("\t----------------------------------")
