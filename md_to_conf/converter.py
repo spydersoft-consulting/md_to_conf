@@ -95,11 +95,10 @@ class MarkdownConverter:
         Returns:
             modified html string
         """
-        html = re.sub(
-            r"<p>\[TOC\]</p>",
-            '<p><ac:structured-macro ac:name="toc" ac:schema-version="1"/></p>',
+        html = str.replace(
             html,
-            1,
+            r"<p>[TOC]</p>",
+            '<p><ac:structured-macro ac:name="toc" ac:schema-version="1"/></p>',
         )
 
         return html
