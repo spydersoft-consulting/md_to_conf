@@ -42,18 +42,22 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        python -m pip install --upgrade tox
         python -m pip install flake8 wheel
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with flake8
       run: |
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --statistics
-    # - name: Test with pytest
-    #   run: |
-    #     pytest
+        tox run -e lint -- . --count --exit-zero --statistics
+
+        #flake8 . --count --exit-zero --statistics
+    - name: Execute Tests
+      run: |
+        tox run -e test
     - name: Build
       run: |
         echo "${{ env.VERSION }}" > version.txt
+        python -m pip install wheel
         python setup.py bdist_wheel
     - name: SonarCloud Scan
       uses: sonarsource/sonarcloud-github-action@master
