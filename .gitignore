@@ -50,6 +50,7 @@ test-output.xml
 # Translations
 *.mo
 *.pot
+testresults/**
 
 # Django stuff:
 *.log
