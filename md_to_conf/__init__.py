@@ -183,7 +183,7 @@ def main():
             mdfile.seek(0)
         has_title = False
 
-    html = converter.get_html_from_markdown(
+    html = converter.convert_md_to_conf_html(
         has_title=has_title,
         remove_emojies=REMOVE_EMOJIES,
         add_contents=CONTENTS,

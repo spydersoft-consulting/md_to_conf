@@ -30,14 +30,14 @@ class MarkdownConverter:
         self.md_source = md_source
         self.editor_version = editor_version
 
-    def get_html_from_markdown(
+    def convert_md_to_conf_html(
         self,
         has_title: bool = False,
         remove_emojies: bool = False,
         add_contents: bool = False,
-    ) -> str:
+    ):
         """
-        Convert the Markdown file to HTML
+        Convert the Markdown file to Confluence HTML
 
         Args:
             has_title: Was a title provided via the CLI?
@@ -47,12 +47,7 @@ class MarkdownConverter:
         Returns:
             A string representing HTML for the Markdown page
         """
-        with codecs.open(self.md_file, "r", "utf-8") as mdfile:
-            markdown_content = mdfile.read()
-            html = markdown.markdown(
-                markdown_content, extensions=["tables", "fenced_code", "footnotes"]
-            )
-
+        html = self.get_html_from_markdown()
         if not has_title:
             html = "\n".join(html.split("\n")[1:])
 
@@ -68,6 +63,22 @@ class MarkdownConverter:
             html = self.add_contents(html)
 
         html = self.process_refs(html)
+
+    def get_html_from_markdown(self) -> str:
+        """
+        Convert the Markdown file to HTML.  This is a wrapper
+        around the markdown library
+
+        Returns:
+            A string representing HTML for the Markdown page
+        """
+        with codecs.open(self.md_file, "r", "utf-8") as mdfile:
+            markdown_content = mdfile.read()
+            html = markdown.markdown(
+                markdown_content, extensions=["tables", "fenced_code", "footnotes"]
+            )
+            # with open("tests/testfiles/basic-md-raw.html", "w") as f:
+            #     f.write(html)
 
         return html
 
@@ -296,7 +307,7 @@ class MarkdownConverter:
 
         Args:
             string: string to modify
-            lowercase: bool indicating whether string has to be lowercased
+            lowercase: whether string has to be lowercased
         Returns:
             slug string
         """
@@ -307,15 +318,14 @@ class MarkdownConverter:
 
         # Remove all html code tags
         slug_string = re.sub(r"<[^>]+>", "", slug_string)
-
         # Remove html code like '&amp;'
         slug_string = re.sub(r"&[a-z]+;", "", slug_string)
-
         # Replace all spaces ( ) with dash (-)
-        slug_string = str.replace(" ", "-", slug_string)
+        slug_string = str.replace(slug_string, " ", "-")
 
         # Remove all special chars, except for dash (-)
         slug_string = re.sub(r"[^a-zA-Z0-9-]", "", slug_string)
+
         return slug_string
 
     def process_headers(self, ref_prefix, ref_postfix, headers):
