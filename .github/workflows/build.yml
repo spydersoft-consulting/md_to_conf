@@ -51,8 +51,7 @@ jobs:
         #flake8 . --count --exit-zero --statistics
     - name: Execute Tests
       run: |
-        tox l
-        tox run -e test
+        tox run -e py311
     - name: Build
       run: |
         echo "${{ env.VERSION }}" > version.txt
