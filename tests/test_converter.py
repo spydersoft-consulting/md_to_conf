@@ -1,5 +1,4 @@
 import pytest
-import codecs
 from md_to_conf import MarkdownConverter
 
 
@@ -24,14 +23,8 @@ def test_converter_init():
     assert converter.editor_version == editor_version
 
 
-def test_converter_basic(test_converter: MarkdownConverter):
+def test_converter_basic(test_converter: MarkdownConverter, snapshot):
     html = test_converter.get_html_from_markdown()
-
-    snapshot = get_snapshot("basic-md-raw.html")
-
-    # with open("tests/testfiles/basic.html", "w") as f:
-    #     f.write(html)
-
     assert html == snapshot
 
 
@@ -43,9 +36,3 @@ def test_slug(test_converter: MarkdownConverter):
 def test_slug_lower(test_converter: MarkdownConverter):
     slug = test_converter.slug("<tag>The $slug</tag>", True)
     assert slug == "the-slug"
-
-
-def get_snapshot(file: str):
-    fullFile = "tests/testfiles/%s" % file
-    with codecs.open(fullFile, "r", "utf-8") as mdfile:
-        return mdfile.read()
