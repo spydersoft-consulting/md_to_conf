@@ -154,7 +154,7 @@ class ConfluenceApiClient:
         except requests.RequestException as err:
             LOGGER.error("err.response: %s", err)
             if response.status_code == 404:
-                return {"error": "Not Found", "status_code": 404}
+                return CheckedResponse(404, {"error": "Not Found"})
             else:
                 LOGGER.error("Error: %d - %s", response.status_code, response.content)
                 sys.exit(1)
@@ -279,7 +279,7 @@ class ConfluenceApiClient:
             return PageInfo(page_id, space_id, version, link)
         else:
             LOGGER.error("Could not create page.")
-            return {"id": 0, "spaceId": 0, "version": ""}
+            return PageInfo(0, 0, 0, "")
 
     def delete_page(self, page_id: int):
         """
@@ -509,7 +509,7 @@ class ConfluenceApiClient:
         response = self.check_errors_and_get_json(self.get_session().get(url))
 
         data = response.data["label"]
-        if response["status_code"] == 404:
+        if response.status_code == 404:
             label = LabelInfo(0, "", "", "")
         else:
             label = LabelInfo(

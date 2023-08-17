@@ -30,7 +30,6 @@ setup(
         "idna",
         "Markdown",
         "requests",
-        "urllib3",
     ],
     entry_points="""
     [console_scripts]
