@@ -77,8 +77,6 @@ class MarkdownConverter:
             html = markdown.markdown(
                 markdown_content, extensions=["tables", "fenced_code", "footnotes"]
             )
-            # with open("tests/testfiles/basic-md-raw.html", "w") as f:
-            #     f.write(html)
 
         return html
 

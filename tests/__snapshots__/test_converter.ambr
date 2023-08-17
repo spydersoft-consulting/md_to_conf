@@ -28,3 +28,6 @@
   </code></pre>
   '''
 # ---
+# name: test_toc_convert
+  '<h1>First heading</h1> <p><ac:structured-macro ac:name="toc" ac:schema-version="1"/></p> <h2>Second heading</h2>'
+# ---

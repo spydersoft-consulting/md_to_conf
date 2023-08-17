@@ -36,3 +36,16 @@ def test_slug(test_converter: MarkdownConverter):
 def test_slug_lower(test_converter: MarkdownConverter):
     slug = test_converter.slug("<tag>The $slug</tag>", True)
     assert slug == "the-slug"
+
+
+def test_convert_comment_block(test_converter: MarkdownConverter):
+    slug = test_converter.convert_comment_block("<!-- some comments go here -->")
+    assert slug == "<ac:placeholder> some comments go here </ac:placeholder>"
+
+
+def test_toc_convert(test_converter: MarkdownConverter, snapshot):
+    slug = test_converter.create_table_of_content(
+        "<h1>First heading</h1> <p>[TOC]</p> <h2>Second heading</h2>"
+    )
+
+    assert slug == snapshot
