@@ -20,7 +20,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Matt Gerega",
-    url="https://github.com/spyder007/md_to_conf",
+    url="https://github.com/spydersoft-consulting/md_to_conf",
     classifiers=["Programming Language :: Python :: 3 :: Only"],
     py_modules=["md_to_conf"],
     install_requires=[
