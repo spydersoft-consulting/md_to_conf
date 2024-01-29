@@ -291,7 +291,7 @@ def get_parser():
     return PARSER
 
 
-def validate_args(user_name, api_key, markdown_file, space_key):
+def validate_args(user_name, api_key, markdown_file, org_name):
     LOGGER = logging.getLogger(__name__)
     if user_name is None:
         LOGGER.error("Error: Username not specified by environment variable or option.")
@@ -305,7 +305,7 @@ def validate_args(user_name, api_key, markdown_file, space_key):
         LOGGER.error("Error: Markdown file: %s does not exist.", markdown_file)
         sys.exit(1)
 
-    else:
+    if org_name is None:
         LOGGER.error("Error: Org Name not specified by environment variable or option.")
         sys.exit(1)
 
@@ -383,7 +383,7 @@ def main():
         TITLE = ARGS.title
         REMOVE_EMOJIES = ARGS.remove_emojies
 
-        validate_args(USERNAME, API_KEY, MARKDOWN_FILE, SPACE_KEY)
+        validate_args(USERNAME, API_KEY, MARKDOWN_FILE, ORGNAME)
 
         SPACE_KEY = get_space_key(SPACE_KEY, USERNAME)
 
