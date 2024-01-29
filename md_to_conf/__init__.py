@@ -28,7 +28,7 @@ def add_attachments(
 
 
 def add_images(
-    file: str, confluenceApi: str, page_id: int, html: str, client: ConfluenceApiClient
+    file: str, confluence_api: str, page_id: int, html: str, client: ConfluenceApiClient
 ) -> str:
     """
     Scan for images and upload as attachments if found
@@ -49,7 +49,7 @@ def add_images(
         basename = os.path.basename(rel_path)
         client.upload_attachment(page_id, abs_path, alt_text)
         if re.search(r"http.*", rel_path) is None:
-            if confluenceApi.endswith("/wiki"):
+            if confluence_api.endswith("/wiki"):
                 html = html.replace(
                     "%s" % (rel_path),
                     "/wiki/download/attachments/%d/%s" % (page_id, basename),
@@ -291,49 +291,53 @@ def get_parser():
     return PARSER
 
 
-def validate_args(USERNAME, API_KEY, MARKDOWN_FILE, SPACE_KEY):
+def validate_args(user_name, api_key, markdown_file, space_key):
     LOGGER = logging.getLogger(__name__)
-    if USERNAME is None:
+    if user_name is None:
         LOGGER.error("Error: Username not specified by environment variable or option.")
         sys.exit(1)
 
-    if API_KEY is None:
+    if api_key is None:
         LOGGER.error("Error: API key not specified by environment variable or option.")
         sys.exit(1)
 
-    if not os.path.exists(MARKDOWN_FILE):
-        LOGGER.error("Error: Markdown file: %s does not exist.", MARKDOWN_FILE)
+    if not os.path.exists(markdown_file):
+        LOGGER.error("Error: Markdown file: %s does not exist.", markdown_file)
         sys.exit(1)
-
-    if SPACE_KEY is None:
-        SPACE_KEY = "~%s" % (USERNAME)
 
     else:
         LOGGER.error("Error: Org Name not specified by environment variable or option.")
         sys.exit(1)
 
 
-def get_confluence_api_url(ORGNAME, NOSSL):
+def get_confluence_api_url(org_name, no_ssl):
     url = ""
-    if ORGNAME is not None:
-        if ORGNAME.find(".") != -1:
-            url = "https://%s" % ORGNAME
+    if org_name is not None:
+        if org_name.find(".") != -1:
+            url = "https://%s" % org_name
         else:
-            url = "https://%s.atlassian.net/wiki" % ORGNAME
-    if NOSSL:
+            url = "https://%s.atlassian.net/wiki" % org_name
+    if no_ssl:
         url.replace("https://", "http://")
     return url
 
 
-def get_parent_page(client, ANCESTOR):
+def get_space_key(space_key, user_name):
+    if space_key is None:
+        return "~%s" % (user_name)
+
+    return space_key
+
+
+def get_parent_page(client, ancestor):
     LOGGER = logging.getLogger(__name__)
     parent_page_id = 0
-    if ANCESTOR:
-        parent_page = client.get_page(ANCESTOR)
+    if ancestor:
+        parent_page = client.get_page(ancestor)
         if parent_page:
             parent_page_id = parent_page.id
         else:
-            LOGGER.error("Error: Parent page does not exist: %s", ANCESTOR)
+            LOGGER.error("Error: Parent page does not exist: %s", ancestor)
             sys.exit(1)
     return parent_page_id
 
@@ -379,7 +383,9 @@ def main():
         TITLE = ARGS.title
         REMOVE_EMOJIES = ARGS.remove_emojies
 
-        validate_args(USERNAME, API_KEY, MARKDOWN_FILE, SPACE_KEY, ORGNAME)
+        validate_args(USERNAME, API_KEY, MARKDOWN_FILE, SPACE_KEY)
+
+        SPACE_KEY = get_space_key(SPACE_KEY, USERNAME)
 
         CONFLUENCE_API_URL = get_confluence_api_url(ORGNAME, NOSSL)
 
