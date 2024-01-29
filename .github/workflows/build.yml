@@ -18,7 +18,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
         clean: true
@@ -34,9 +34,9 @@ jobs:
     - name: Set release version
       if: ${{ github.event.action == 'published' && !github.event.release.draft}}
       run:  TAG=$(git describe --tags); if github.event.release.prerelease; then RELEASE=".pre"; else  RELEASE="";  fi; echo "VERSION=${TAG}${RELEASE}" >> $GITHUB_ENV
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Python 3.11
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: 3.11
     - name: Install dependencies
