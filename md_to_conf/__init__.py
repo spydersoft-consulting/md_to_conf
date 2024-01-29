@@ -8,7 +8,6 @@ import typing
 from .client import ConfluenceApiClient
 from .converter import MarkdownConverter
 
-
 def add_attachments(page_id: int, files: typing.List[str], client: ConfluenceApiClient):
     """
     Add attachments for an array of files
@@ -162,7 +161,7 @@ def main():
     Main program
 
     """
-
+    
     LOGGER.info("\t----------------------------------")
     LOGGER.info("\tMarkdown to Confluence Upload Tool")
     LOGGER.info("\t----------------------------------")
@@ -245,7 +244,7 @@ def main():
     LOGGER.info("Markdown Converter completed successfully.")
 
 
-if __name__ == "__main__":
+if __name__ == "md_to_conf":
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - \
