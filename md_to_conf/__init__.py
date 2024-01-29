@@ -9,32 +9,38 @@ from .client import ConfluenceApiClient
 from .converter import MarkdownConverter
 
 
-def add_attachments(page_id: int, files: typing.List[str], client: ConfluenceApiClient):
+def add_attachments(
+    file: str, page_id: int, files: typing.List[str], client: ConfluenceApiClient
+):
     """
     Add attachments for an array of files
 
     Args:
+       file: markdown file
         page_id: Confluence page id
         files: list of files to attach to the given Confluence page
     """
-    source_folder = os.path.dirname(os.path.abspath(MARKDOWN_FILE))
+    source_folder = os.path.dirname(os.path.abspath(file))
 
     if files:
         for file in files:
             client.upload_attachment(page_id, os.path.join(source_folder, file), "")
 
 
-def add_images(page_id: int, html: str, client: ConfluenceApiClient) -> str:
+def add_images(
+    file: str, confluenceApi: str, page_id: int, html: str, client: ConfluenceApiClient
+) -> str:
     """
     Scan for images and upload as attachments if found
 
     Args:
+        file: markdown file
         page_id: Confluence page id
         html: html string
     Returns:
         html with modified image reference
     """
-    source_folder = os.path.dirname(os.path.abspath(MARKDOWN_FILE))
+    source_folder = os.path.dirname(os.path.abspath(file))
 
     for tag in re.findall(r"<img(.*?)\/>", html):
         rel_path = re.search(r'src="(.*?)"', tag).group(1)
@@ -43,7 +49,7 @@ def add_images(page_id: int, html: str, client: ConfluenceApiClient) -> str:
         basename = os.path.basename(rel_path)
         client.upload_attachment(page_id, abs_path, alt_text)
         if re.search(r"http.*", rel_path) is None:
-            if CONFLUENCE_API_URL.endswith("/wiki"):
+            if confluenceApi.endswith("/wiki"):
                 html = html.replace(
                     "%s" % (rel_path),
                     "/wiki/download/attachments/%d/%s" % (page_id, basename),
@@ -57,7 +63,12 @@ def add_images(page_id: int, html: str, client: ConfluenceApiClient) -> str:
 
 
 def add_local_refs(
-    page_id: int, space_id: int, title: str, html: str, converter: MarkdownConverter
+    source: str,
+    page_id: int,
+    space_id: int,
+    title: str,
+    html: str,
+    converter: MarkdownConverter,
 ) -> str:
     """
     Convert local links to correct confluence local links
@@ -71,12 +82,12 @@ def add_local_refs(
     Returns:
         modified html string
     """
-
+    LOGGER = logging.getLogger(__name__)
     ref_prefixes = {"default": "#", "bitbucket": "#markdown-header-"}
     ref_postfixes = {"default": "_%d", "bitbucket": "_%d"}
 
     # We ignore local references in case of unknown or unspecified markdown source
-    if MARKDOWN_SOURCE not in ref_prefixes or MARKDOWN_SOURCE not in ref_postfixes:
+    if source not in ref_prefixes or source not in ref_postfixes:
         LOGGER.warning(
             "Local references weren't"
             "processed because "
@@ -86,8 +97,8 @@ def add_local_refs(
         )
         return html
 
-    ref_prefix = ref_prefixes[MARKDOWN_SOURCE]
-    ref_postfix = ref_postfixes[MARKDOWN_SOURCE]
+    ref_prefix = ref_prefixes[source]
+    ref_postfix = ref_postfixes[source]
 
     LOGGER.info("Converting confluence local links...")
 
@@ -108,7 +119,9 @@ def add_local_refs(
     return html
 
 
-def get_properties_to_update(client, page_id: int) -> typing.List[any]:
+def get_properties_to_update(
+    version: str, props: dict, client, page_id: int
+) -> typing.List[any]:
     """
     Get a list of properties which have changed
 
@@ -122,21 +135,21 @@ def get_properties_to_update(client, page_id: int) -> typing.List[any]:
     for existing_prop in properties:
         # Change the editor version
         if existing_prop["key"] == "editor" and existing_prop["value"] != (
-            "v%d" % VERSION
+            "v%d" % version
         ):
             properties_for_update.append(
                 {
                     "key": "editor",
                     "version": existing_prop["version"]["number"] + 1,
-                    "value": ("v%d" % VERSION),
+                    "value": ("v%d" % version),
                     "id": existing_prop["id"],
                 }
             )
 
-    if not PROPERTIES:
+    if not props:
         return properties_for_update
 
-    for key in PROPERTIES:
+    for key in props:
         found = False
         for existing_prop in properties:
             if existing_prop["key"] == key:
@@ -144,33 +157,20 @@ def get_properties_to_update(client, page_id: int) -> typing.List[any]:
                     {
                         "key": key,
                         "version": existing_prop["version"]["number"] + 1,
-                        "value": PROPERTIES[key],
+                        "value": props[key],
                         "id": existing_prop["id"],
                     }
                 )
                 found = True
         if not found:
             properties_for_update.append(
-                {"key": key, "version": 1, "value": PROPERTIES[key]}
+                {"key": key, "version": 1, "value": props[key]}
             )
 
     return properties_for_update
 
 
-def main():
-    """
-    Main program
-
-    """
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - \
-        %(levelname)s - %(funcName)s [%(lineno)d] - \
-        %(message)s",
-    )
-    LOGGER = logging.getLogger(__name__)
-
-    # ArgumentParser to parse arguments and options
+def get_parser():
     PARSER = argparse.ArgumentParser()
     PARSER.add_argument(
         "markdownFile", help="Full path of the markdown file to convert and upload."
@@ -288,6 +288,72 @@ def main():
         "the database doesn't support emojies",
     )
 
+    return PARSER
+
+
+def validate_args(USERNAME, API_KEY, MARKDOWN_FILE, SPACE_KEY):
+    LOGGER = logging.getLogger(__name__)
+    if USERNAME is None:
+        LOGGER.error("Error: Username not specified by environment variable or option.")
+        sys.exit(1)
+
+    if API_KEY is None:
+        LOGGER.error("Error: API key not specified by environment variable or option.")
+        sys.exit(1)
+
+    if not os.path.exists(MARKDOWN_FILE):
+        LOGGER.error("Error: Markdown file: %s does not exist.", MARKDOWN_FILE)
+        sys.exit(1)
+
+    if SPACE_KEY is None:
+        SPACE_KEY = "~%s" % (USERNAME)
+
+    else:
+        LOGGER.error("Error: Org Name not specified by environment variable or option.")
+        sys.exit(1)
+
+
+def get_confluence_api_url(ORGNAME, NOSSL):
+    url = ""
+    if ORGNAME is not None:
+        if ORGNAME.find(".") != -1:
+            url = "https://%s" % ORGNAME
+        else:
+            url = "https://%s.atlassian.net/wiki" % ORGNAME
+    if NOSSL:
+        url.replace("https://", "http://")
+    return url
+
+
+def get_parent_page(client, ANCESTOR):
+    LOGGER = logging.getLogger(__name__)
+    parent_page_id = 0
+    if ANCESTOR:
+        parent_page = client.get_page(ANCESTOR)
+        if parent_page:
+            parent_page_id = parent_page.id
+        else:
+            LOGGER.error("Error: Parent page does not exist: %s", ANCESTOR)
+            sys.exit(1)
+    return parent_page_id
+
+
+def main():
+    """
+    Main program
+
+    """
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - \
+        %(levelname)s - %(funcName)s [%(lineno)d] - \
+        %(message)s",
+    )
+    LOGGER = logging.getLogger(__name__)
+
+    # ArgumentParser to parse arguments and options
+    PARSER = get_parser()
+
     ARGS = PARSER.parse_args()
 
     # Assign global variables
@@ -313,43 +379,15 @@ def main():
         TITLE = ARGS.title
         REMOVE_EMOJIES = ARGS.remove_emojies
 
-        if USERNAME is None:
-            LOGGER.error(
-                "Error: Username not specified by environment variable or option."
-            )
-            sys.exit(1)
+        validate_args(USERNAME, API_KEY, MARKDOWN_FILE, SPACE_KEY, ORGNAME)
 
-        if API_KEY is None:
-            LOGGER.error(
-                "Error: API key not specified by environment variable or option."
-            )
-            sys.exit(1)
-
-        if not os.path.exists(MARKDOWN_FILE):
-            LOGGER.error("Error: Markdown file: %s does not exist.", MARKDOWN_FILE)
-            sys.exit(1)
-
-        if SPACE_KEY is None:
-            SPACE_KEY = "~%s" % (USERNAME)
-
-        if ORGNAME is not None:
-            if ORGNAME.find(".") != -1:
-                CONFLUENCE_API_URL = "https://%s" % ORGNAME
-            else:
-                CONFLUENCE_API_URL = "https://%s.atlassian.net/wiki" % ORGNAME
-        else:
-            LOGGER.error(
-                "Error: Org Name not specified by environment variable or option."
-            )
-            sys.exit(1)
-
-        if NOSSL:
-            CONFLUENCE_API_URL.replace("https://", "http://")
+        CONFLUENCE_API_URL = get_confluence_api_url(ORGNAME, NOSSL)
 
     except Exception as err:
         LOGGER.error("\n\nException caught:\n%s ", err)
         LOGGER.error("\nFailed to process command line arguments. Exiting.")
         sys.exit(1)
+
     LOGGER.info("\t----------------------------------")
     LOGGER.info("\tMarkdown to Confluence Upload Tool")
     LOGGER.info("\t----------------------------------")
@@ -393,28 +431,24 @@ def main():
         client.delete_page(page.id)
         sys.exit(1)
 
-    parent_page_id = 0
-
-    if ANCESTOR:
-        parent_page = client.get_page(ANCESTOR)
-        if parent_page:
-            parent_page_id = parent_page.id
-        else:
-            LOGGER.error("Error: Parent page does not exist: %s", ANCESTOR)
-            sys.exit(1)
+    parent_page_id = get_parent_page(client, ANCESTOR)
 
     if page.id == 0:
         page = client.create_page(title, html, parent_page_id)
 
     LOGGER.info("Page Id %d" % page.id)
 
-    html = add_images(page.id, html, client)
+    html = add_images(MARKDOWN_FILE, CONFLUENCE_API_URL, page.id, html, client)
     # Add local references
-    html = add_local_refs(page.id, page.spaceId, title, html, converter)
+    html = add_local_refs(
+        MARKDOWN_SOURCE, page.id, page.spaceId, title, html, converter
+    )
 
     client.update_page(page.id, title, html, page.version, parent_page_id)
 
-    properties_for_update = get_properties_to_update(client, page.id)
+    properties_for_update = get_properties_to_update(
+        VERSION, PROPERTIES, client, page.id
+    )
     if len(properties_for_update) > 0:
         LOGGER.info(
             "Updating %s page content properties..." % len(properties_for_update)
@@ -427,6 +461,6 @@ def main():
         client.update_labels(page.id, LABELS)
 
     if ATTACHMENTS:
-        add_attachments(page.id, ATTACHMENTS, client)
+        add_attachments(MARKDOWN_FILE, page.id, ATTACHMENTS, client)
 
     LOGGER.info("Markdown Converter completed successfully.")
