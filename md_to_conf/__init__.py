@@ -8,6 +8,7 @@ import typing
 from .client import ConfluenceApiClient
 from .converter import MarkdownConverter
 
+
 def add_attachments(page_id: int, files: typing.List[str], client: ConfluenceApiClient):
     """
     Add attachments for an array of files
@@ -161,90 +162,6 @@ def main():
     Main program
 
     """
-    
-    LOGGER.info("\t----------------------------------")
-    LOGGER.info("\tMarkdown to Confluence Upload Tool")
-    LOGGER.info("\t----------------------------------")
-
-    LOGGER.info("Markdown file:\t%s", MARKDOWN_FILE)
-    LOGGER.info("Space Key:\t%s", SPACE_KEY)
-
-    converter = MarkdownConverter(
-        MARKDOWN_FILE, CONFLUENCE_API_URL, MARKDOWN_SOURCE, VERSION
-    )
-
-    if TITLE:
-        title = TITLE
-        has_title = True
-    else:
-        with open(MARKDOWN_FILE, "r") as mdfile:
-            title = mdfile.readline().lstrip("#").strip()
-            mdfile.seek(0)
-        has_title = False
-
-    html = converter.convert_md_to_conf_html(
-        has_title=has_title,
-        remove_emojies=REMOVE_EMOJIES,
-        add_contents=CONTENTS,
-    )
-
-    LOGGER.debug("html: %s", html)
-
-    if SIMULATE:
-        LOGGER.info("Simulate mode is active - stop processing here.")
-        sys.exit(0)
-
-    client = ConfluenceApiClient(
-        CONFLUENCE_API_URL, USERNAME, API_KEY, SPACE_KEY, VERSION, not NOSSL
-    )
-
-    LOGGER.info("Checking if Atlas page exists...")
-    page = client.get_page(title)
-
-    if DELETE and page:
-        client.delete_page(page.id)
-        sys.exit(1)
-
-    parent_page_id = 0
-
-    if ANCESTOR:
-        parent_page = client.get_page(ANCESTOR)
-        if parent_page:
-            parent_page_id = parent_page.id
-        else:
-            LOGGER.error("Error: Parent page does not exist: %s", ANCESTOR)
-            sys.exit(1)
-
-    if page.id == 0:
-        page = client.create_page(title, html, parent_page_id)
-
-    LOGGER.info("Page Id %d" % page.id)
-
-    html = add_images(page.id, html, client)
-    # Add local references
-    html = add_local_refs(page.id, page.spaceId, title, html, converter)
-
-    client.update_page(page.id, title, html, page.version, parent_page_id)
-
-    properties_for_update = get_properties_to_update(client, page.id)
-    if len(properties_for_update) > 0:
-        LOGGER.info(
-            "Updating %s page content properties..." % len(properties_for_update)
-        )
-
-        for prop in properties_for_update:
-            client.update_page_property(page.id, prop)
-
-    if LABELS:
-        client.update_labels(page.id, LABELS)
-
-    if ATTACHMENTS:
-        add_attachments(page.id, ATTACHMENTS, client)
-
-    LOGGER.info("Markdown Converter completed successfully.")
-
-
-if __name__ == "md_to_conf":
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - \
@@ -433,4 +350,83 @@ if __name__ == "md_to_conf":
         LOGGER.error("\n\nException caught:\n%s ", err)
         LOGGER.error("\nFailed to process command line arguments. Exiting.")
         sys.exit(1)
-    main()
+    LOGGER.info("\t----------------------------------")
+    LOGGER.info("\tMarkdown to Confluence Upload Tool")
+    LOGGER.info("\t----------------------------------")
+
+    LOGGER.info("Markdown file:\t%s", MARKDOWN_FILE)
+    LOGGER.info("Space Key:\t%s", SPACE_KEY)
+
+    converter = MarkdownConverter(
+        MARKDOWN_FILE, CONFLUENCE_API_URL, MARKDOWN_SOURCE, VERSION
+    )
+
+    if TITLE:
+        title = TITLE
+        has_title = True
+    else:
+        with open(MARKDOWN_FILE, "r") as mdfile:
+            title = mdfile.readline().lstrip("#").strip()
+            mdfile.seek(0)
+        has_title = False
+
+    html = converter.convert_md_to_conf_html(
+        has_title=has_title,
+        remove_emojies=REMOVE_EMOJIES,
+        add_contents=CONTENTS,
+    )
+
+    LOGGER.debug("html: %s", html)
+
+    if SIMULATE:
+        LOGGER.info("Simulate mode is active - stop processing here.")
+        sys.exit(0)
+
+    client = ConfluenceApiClient(
+        CONFLUENCE_API_URL, USERNAME, API_KEY, SPACE_KEY, VERSION, not NOSSL
+    )
+
+    LOGGER.info("Checking if Atlas page exists...")
+    page = client.get_page(title)
+
+    if DELETE and page:
+        client.delete_page(page.id)
+        sys.exit(1)
+
+    parent_page_id = 0
+
+    if ANCESTOR:
+        parent_page = client.get_page(ANCESTOR)
+        if parent_page:
+            parent_page_id = parent_page.id
+        else:
+            LOGGER.error("Error: Parent page does not exist: %s", ANCESTOR)
+            sys.exit(1)
+
+    if page.id == 0:
+        page = client.create_page(title, html, parent_page_id)
+
+    LOGGER.info("Page Id %d" % page.id)
+
+    html = add_images(page.id, html, client)
+    # Add local references
+    html = add_local_refs(page.id, page.spaceId, title, html, converter)
+
+    client.update_page(page.id, title, html, page.version, parent_page_id)
+
+    properties_for_update = get_properties_to_update(client, page.id)
+    if len(properties_for_update) > 0:
+        LOGGER.info(
+            "Updating %s page content properties..." % len(properties_for_update)
+        )
+
+        for prop in properties_for_update:
+            client.update_page_property(page.id, prop)
+
+    if LABELS:
+        client.update_labels(page.id, LABELS)
+
+    if ATTACHMENTS:
+        add_attachments(page.id, ATTACHMENTS, client)
+
+    LOGGER.info("Markdown Converter completed successfully.")
