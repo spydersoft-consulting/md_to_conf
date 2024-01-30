@@ -30,6 +30,7 @@ setup(
         "idna",
         "Markdown",
         "requests",
+        "mdx_truly_sane_lists"
     ],
     entry_points="""
     [console_scripts]

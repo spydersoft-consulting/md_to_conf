@@ -63,6 +63,7 @@ class MarkdownConverter:
             html = self.add_contents(html)
 
         html = self.process_refs(html)
+        return html
 
     def get_html_from_markdown(self) -> str:
         """
@@ -75,7 +76,13 @@ class MarkdownConverter:
         with codecs.open(self.md_file, "r", "utf-8") as mdfile:
             markdown_content = mdfile.read()
             html = markdown.markdown(
-                markdown_content, extensions=["tables", "fenced_code", "footnotes"]
+                markdown_content,
+                extensions=[
+                    "tables",
+                    "fenced_code",
+                    "footnotes",
+                    "mdx_truly_sane_lists",
+                ],
             )
 
         return html

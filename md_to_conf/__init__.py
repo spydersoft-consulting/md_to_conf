@@ -41,7 +41,6 @@ def add_images(
         html with modified image reference
     """
     source_folder = os.path.dirname(os.path.abspath(file))
-
     for tag in re.findall(r"<img(.*?)\/>", html):
         rel_path = re.search(r'src="(.*?)"', tag).group(1)
         alt_text = re.search(r'alt="(.*?)"', tag).group(1)
@@ -443,7 +442,6 @@ def main():
         page = client.create_page(title, html, parent_page_id)
 
     LOGGER.info("Page Id %d" % page.id)
-
     html = add_images(MARKDOWN_FILE, CONFLUENCE_API_URL, page.id, html, client)
     # Add local references
     html = add_local_refs(

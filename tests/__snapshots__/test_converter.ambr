@@ -11,15 +11,13 @@
   <ul>
   <li>An</li>
   <li>unordered</li>
-  <li>
-  <p>list</p>
-  </li>
-  <li>
-  <p>An</p>
-  </li>
+  <li>list</li>
+  </ul>
+  <ol>
+  <li>An</li>
   <li>Ordered</li>
   <li>List</li>
-  </ul>
+  </ol>
   <pre><code class="language-less">&gt; This is an info
   </code></pre>
   <pre><code class="language-less">&gt; Note: This is a note
