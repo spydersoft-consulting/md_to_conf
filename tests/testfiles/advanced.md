@@ -1,4 +1,4 @@
-# Heading 1
+# Advanced Page
 
 ## Heading 2
 
@@ -44,21 +44,8 @@ Text above warning
 
 > Warning: This should be a warning block
 
-```less
-> This is an info
-```
-
-```less
-> Note: This is a note
-```
-
-```less
-> Warning: This is a warning
-```
-
 ```
 This is a code block with on language assigned
-
 ```
 
 ```javascript

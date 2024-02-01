@@ -157,7 +157,7 @@ def main():
         level=logging.INFO,
         format="%(asctime)s - \
         %(levelname)s - %(funcName)s [%(lineno)d] - \
-        %(message)s",
+        \t%(message)s",
     )
     LOGGER = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 # serializer version: 1
 # name: test_converter_basic_test
   '''
-  <h1>Heading 1</h1>
+  <h1>Basic Page</h1>
   <h2>Heading 2</h2>
   <p>Some text for heading 2</p>
   <h3>Heading 3-1</h3>
@@ -44,11 +44,11 @@
   <li>Ordered</li>
   <li>List</li>
   </ol>
-  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">language-less</ac:parameter><ac:plain-text-body><![CDATA[> This is an info
+  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">less</ac:parameter><ac:plain-text-body><![CDATA[> This is an info
   ]]></ac:plain-text-body></ac:structured-macro>
-  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">language-less</ac:parameter><ac:plain-text-body><![CDATA[> Note: This is a note
+  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">less</ac:parameter><ac:plain-text-body><![CDATA[> Note: This is a note
   ]]></ac:plain-text-body></ac:structured-macro>
-  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">language-less</ac:parameter><ac:plain-text-body><![CDATA[> Warning: This is a warning
+  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">less</ac:parameter><ac:plain-text-body><![CDATA[> Warning: This is a warning
   ]]></ac:plain-text-body></ac:structured-macro>
   '''
 # ---
@@ -94,16 +94,9 @@
   <p><ac:structured-macro ac:name="note"><ac:rich-text-body><p>This should be a note block</p></ac:rich-text-body></ac:structured-macro></p>
   <p>Text above warning</p>
   <p><ac:structured-macro ac:name="warning"><ac:rich-text-body><p>This should be a warning block</p></ac:rich-text-body></ac:structured-macro></p>
-  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">language-less</ac:parameter><ac:plain-text-body><![CDATA[> This is an info
-  ]]></ac:plain-text-body></ac:structured-macro>
-  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">language-less</ac:parameter><ac:plain-text-body><![CDATA[> Note: This is a note
-  ]]></ac:plain-text-body></ac:structured-macro>
-  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">language-less</ac:parameter><ac:plain-text-body><![CDATA[> Warning: This is a warning
-  ]]></ac:plain-text-body></ac:structured-macro>
   <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">none</ac:parameter><ac:plain-text-body><![CDATA[This is a code block with on language assigned
-  
   ]]></ac:plain-text-body></ac:structured-macro>
-  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">language-javascript</ac:parameter><ac:plain-text-body><![CDATA[var block = has_javascript_lang();
+  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">javascript</ac:parameter><ac:plain-text-body><![CDATA[var block = has_javascript_lang();
   ]]></ac:plain-text-body></ac:structured-macro>
   '''
 # ---
@@ -157,16 +150,9 @@
   <p><ac:structured-macro ac:name="note"><ac:rich-text-body><p>This should be a note block</p></ac:rich-text-body></ac:structured-macro></p>
   <p>Text above warning</p>
   <p><ac:structured-macro ac:name="warning"><ac:rich-text-body><p>This should be a warning block</p></ac:rich-text-body></ac:structured-macro></p>
-  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">language-less</ac:parameter><ac:plain-text-body><![CDATA[> This is an info
-  ]]></ac:plain-text-body></ac:structured-macro>
-  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">language-less</ac:parameter><ac:plain-text-body><![CDATA[> Note: This is a note
-  ]]></ac:plain-text-body></ac:structured-macro>
-  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">language-less</ac:parameter><ac:plain-text-body><![CDATA[> Warning: This is a warning
-  ]]></ac:plain-text-body></ac:structured-macro>
   <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">none</ac:parameter><ac:plain-text-body><![CDATA[This is a code block with on language assigned
-  
   ]]></ac:plain-text-body></ac:structured-macro>
-  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">language-javascript</ac:parameter><ac:plain-text-body><![CDATA[var block = has_javascript_lang();
+  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">javascript</ac:parameter><ac:plain-text-body><![CDATA[var block = has_javascript_lang();
   ]]></ac:plain-text-body></ac:structured-macro>
   '''
 # ---
