@@ -128,6 +128,8 @@ class MarkdownConverter:
         Returns:
             modified html string
         """
+        LOGGER.debug("HTML pre code block")
+        LOGGER.debug(html)
         code_blocks = re.findall(r"<pre><code.*?>.*?</code></pre>", html, re.DOTALL)
         if code_blocks:
             for tag in code_blocks:
@@ -139,7 +141,7 @@ class MarkdownConverter:
                     conf_ml + '<ac:parameter ac:name="linenumbers">true</ac:parameter>'
                 )
 
-                lang = re.search('code class="(.*)"', tag)
+                lang = re.search('code class="language-(.*)"', tag)
                 if lang:
                     lang = lang.group(1)
                 else:

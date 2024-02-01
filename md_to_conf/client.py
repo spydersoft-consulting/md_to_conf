@@ -135,11 +135,11 @@ class ConfluenceApiClient:
             log_values: Additional key/value pairs to log
 
         """
-        LOGGER.error("%s not found." % object_name)
+        LOGGER.error(f"{object_name} not found.")
         LOGGER.error("Diagnostic Information")
-        LOGGER.error("\tURL: %s", self.confluence_api_url)
-        for log_value in log_values:
-            LOGGER.error("\t%s: %s" % log_value.key, log_value.value)
+        LOGGER.error(f"\tURL: {self.confluence_api_url}")
+        for key in log_values:
+            LOGGER.error(f"\t{key}: {log_values[key]}")
 
     def check_errors_and_get_json(self, response: requests.Response) -> CheckedResponse:
         """
@@ -152,7 +152,7 @@ class ConfluenceApiClient:
         try:
             response.raise_for_status()
         except requests.RequestException as err:
-            LOGGER.error("err.response: %s", err)
+            LOGGER.debug("err.response: %s", err)
             if response.status_code == 404:
                 return CheckedResponse(404, {"error": "Not Found"})
             else:
@@ -508,10 +508,10 @@ class ConfluenceApiClient:
 
         response = self.check_errors_and_get_json(self.get_session().get(url))
 
-        data = response.data["label"]
         if response.status_code == 404:
             label = LabelInfo(0, "", "", "")
         else:
+            data = response.data["label"]
             label = LabelInfo(
                 int(data["id"]),
                 data["name"],
@@ -523,7 +523,7 @@ class ConfluenceApiClient:
 
     def add_label(self, page_id: int, label_name: str) -> bool:
         """
-        Add the given lable to the given page Id
+        Add the given label to the given page Id
 
         Args:
             page_id: pageId

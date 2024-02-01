@@ -1,4 +1,4 @@
-# Heading 1
+# Basic Page
 
 ## Heading 2
 
