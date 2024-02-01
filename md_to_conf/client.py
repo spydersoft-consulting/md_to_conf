@@ -135,11 +135,11 @@ class ConfluenceApiClient:
             log_values: Additional key/value pairs to log
 
         """
-        LOGGER.error("%s not found." % object_name)
+        LOGGER.error(f"{object_name} not found.")
         LOGGER.error("Diagnostic Information")
-        LOGGER.error("\tURL: %s", self.confluence_api_url)
-        for log_value in log_values:
-            LOGGER.error("\t%s: %s" % log_value.key, log_value.value)
+        LOGGER.error(f"\tURL: {self.confluence_api_url}")
+        for key in log_values:
+            LOGGER.error(f'\t{key}: {log_values[key]}')
 
     def check_errors_and_get_json(self, response: requests.Response) -> CheckedResponse:
         """
