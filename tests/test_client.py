@@ -38,4 +38,3 @@ def test_log_not_found(caplog, test_client):
     assert len(caplog.records) == 4
     assert "test not found." == caplog.records[0].message
     assert "\tPage Id: 0" == caplog.records[3].message
-    

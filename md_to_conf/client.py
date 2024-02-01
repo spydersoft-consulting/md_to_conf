@@ -139,7 +139,7 @@ class ConfluenceApiClient:
         LOGGER.error("Diagnostic Information")
         LOGGER.error(f"\tURL: {self.confluence_api_url}")
         for key in log_values:
-            LOGGER.error(f'\t{key}: {log_values[key]}')
+            LOGGER.error(f"\t{key}: {log_values[key]}")
 
     def check_errors_and_get_json(self, response: requests.Response) -> CheckedResponse:
         """
