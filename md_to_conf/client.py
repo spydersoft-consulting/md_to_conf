@@ -7,6 +7,7 @@ import typing
 import mimetypes
 import urllib
 import requests
+from typing import Dict
 
 LOGGER = logging.getLogger(__name__)
 
@@ -126,7 +127,7 @@ class ConfluenceApiClient:
             session.headers.update({"Content-Type": "application/json"})
         return session
 
-    def log_not_found(self, object_name: str, log_values: dict[str, str]):
+    def log_not_found(self, object_name: str, log_values: Dict[str, str]):
         """
         Write a "not found" message to the LOGGER
 

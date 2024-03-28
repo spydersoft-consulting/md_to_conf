@@ -7,7 +7,7 @@
 ![Sonar Violations (long format)](https://img.shields.io/sonar/violations/spydersoft-consulting_md_to_conf?server=https%3A%2F%2Fsonarcloud.io)
 
 
-This tool can be used to import markdown documents into Confluence.  It is a fork of [RittmanMead/md_to_conf](https://github.com/RittmanMead/md_to_conf), upgraded to Python 3.11 and the Confluence v2 APIs.
+This tool can be used to import markdown documents into Confluence.  It is a fork of [spydersoft-consulting/md_to_conf](https://github.com/spydersoft-consulting/md_to_conf) which is a fork of [RittmanMead/md_to_conf](https://github.com/RittmanMead/md_to_conf), downgraded to Python 3.8.
 
 The file is converted to HTML and uploaded to Confluence using their `storage` representation.  The following functionality is supported:
 
