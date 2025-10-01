@@ -75,6 +75,18 @@ To check your files before committing:
 > pre-commit run
 ```
 
+### Testing
+`tox` is used to setup tests and linting.  It can be used to run tests locally.
+
+```bash
+# Install tox
+python -m pip install --upgrade tox
+
+#run tests
+tox run -e py311
+
+```
+
 ## Documentation
 
 This repository uses [mkdocs](https://www.mkdocs.org/) to generate the documentation site, along with [mkdocsstrings-python](https://mkdocstrings.github.io/python/) to extract documentation from code comments.  This project uses [Google-formatted docstrings](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html) to generate, so please follow that standard when documenting code.
