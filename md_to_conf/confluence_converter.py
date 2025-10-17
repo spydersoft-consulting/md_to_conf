@@ -81,7 +81,7 @@ class ConfluenceConverter:
         page = self.confluence_client.get_page(title)
 
         if delete and page is not None and page.id > 0:
-            self.client.delete_page(page.id)
+            self.confluence_client.delete_page(page.id)
             return
 
         parent_page_id = self.get_parent_page()
@@ -92,7 +92,7 @@ class ConfluenceConverter:
         LOGGER.info("Page Id %d" % page.id)
         html = self.add_images(page.id, html)
         # Add local references
-        html = self.add_local_refs(page.id, page.spaceId, title, html, converter)
+        html = self.add_local_refs(page.id, title, html, converter)
 
         self.confluence_client.update_page(
             page.id, title, html, page.version, parent_page_id
@@ -164,7 +164,6 @@ class ConfluenceConverter:
     def add_local_refs(
         self,
         page_id: int,
-        space_id: int,
         title: str,
         html: str,
         converter: MarkdownConverter,
@@ -174,7 +173,6 @@ class ConfluenceConverter:
 
         Args:
             page_id: Page ID
-            space_id: Space ID
             title: Page Title
             html: string representing page HTML
             converter: an instance of the MarkdownConverter for this page
@@ -214,7 +212,7 @@ class ConfluenceConverter:
             return html
 
         html = converter.process_links(
-            html, links, headers_map, space_id, page_id, title
+            html, links, headers_map, self.space_key, page_id, title
         )
 
         return html

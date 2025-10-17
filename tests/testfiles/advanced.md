@@ -1,5 +1,7 @@
 # Advanced Page
 
+[Link to Heading](#heading-3-2)
+
 ## Heading 2
 
 Some text for heading 2
@@ -25,7 +27,7 @@ Some test for heading 3-2
   * This is a child of item 2
   * Another child of item 2
 * This is the third item
-  
+
 1. This list is nested
 2. This item has children
    1. This is a child of item 2

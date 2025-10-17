@@ -362,7 +362,7 @@ class MarkdownConverter:
         return headers_map
 
     def process_links(
-        self, html, links, headers_map, space_id: int, page_id: int, title: str
+        self, html, links, headers_map, space_key: str, page_id: int, title: str
     ):
         for link in links:
             matches = re.search(r'<a href="(#.+?)">(.+?)</a>', link)
@@ -372,9 +372,9 @@ class MarkdownConverter:
             result_ref = headers_map.get(ref)
 
             if result_ref:
-                base_uri = "%s/spaces/%d/pages/%d/%s" % (
+                base_uri = "%s/spaces/%s/pages/%d/%s" % (
                     self.api_url,
-                    space_id,
+                    space_key,
                     page_id,
                     "+".join(title.split()),
                 )
@@ -393,6 +393,7 @@ class MarkdownConverter:
                         alt,
                     )
 
+                LOGGER.debug("Replacing link %s with %s", link, replacement)
                 html = html.replace(link, replacement)
 
         return html
