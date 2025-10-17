@@ -252,12 +252,7 @@ class ConfluenceApiClient:
             "spaceId": "%d" % space_id,
             "status": "current",
             "body": {"value": body, "representation": "storage"},
-            "parentId": "%s" % parent_id,
-            "metadata": {
-                "properties": {
-                    "editor": {"key": "editor", "value": "v%d" % self.editor_version}
-                }
-            },
+            "parentId": "%s" % parent_id
         }
 
         LOGGER.debug("data: %s", json.dumps(new_page))
