@@ -81,7 +81,7 @@ class ConfluenceConverter:
         page = self.confluence_client.get_page(title)
 
         if delete and page is not None and page.id > 0:
-            self.client.delete_page(page.id)
+            self.confluence_client.delete_page(page.id)
             return
 
         parent_page_id = self.get_parent_page()
