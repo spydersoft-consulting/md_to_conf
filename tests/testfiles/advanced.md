@@ -34,17 +34,39 @@ Some test for heading 3-2
    2. Another child of item 2
 3. This is the third item
 
+### Block Quote Conversion
+
 Text above Info
 
-> This should be an info block
-
-Text above Note
-
-> Note: This should be a note block
+> This is an info.
 
 Text above warning
 
-> Warning: This should be a warning block
+> Warning: This is a warning.
+
+Text above success
+
+> Success: This is a success.
+
+Text above error
+
+> Error: This is an error.
+
+Text above Note
+
+> Note: This is a note.
+
+### Custom Panel Syntax
+
+~?This is an info.?~
+
+~%This is a warning.%~
+
+~^This is a success.^~
+
+~$This is an error.$~
+
+~!This is a note.!~
 
 ```
 This is a code block with on language assigned
