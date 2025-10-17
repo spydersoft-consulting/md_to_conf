@@ -298,9 +298,14 @@ class ConfluenceConverter:
         parent_page_id = 0
         if self.ancestor:
             parent_page = self.confluence_client.get_page(self.ancestor)
-            if parent_page:
+            if parent_page is not None and parent_page.id > 0:
                 parent_page_id = parent_page.id
             else:
-                LOGGER.error("Error: Parent page does not exist: %s", self.ancestor)
-                parent_page_id = 0
+                parent_folder = self.confluence_client.get_folder(self.ancestor)
+                if parent_folder > 0:
+                    parent_page_id = parent_folder
+                    
+        if parent_page_id == 0:
+            LOGGER.error("Error: Parent page/folder does not exist: %s", self.ancestor)
+
         return parent_page_id
