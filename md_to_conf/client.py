@@ -367,7 +367,8 @@ class ConfluenceApiClient:
 
         """
 
-        space_id = self.get_space_id()
+        # This call populates self.space_home_page_id
+        self.get_space_id()
 
         LOGGER.debug("\tRetrieving folder information: %s", folder_name)
         url = "%s/api/v2/pages/%d/descendants?depth=5" % (self.confluence_api_url, self.space_home_page_id)
@@ -380,21 +381,21 @@ class ConfluenceApiClient:
             if response.status_code == 404:
                 self.log_not_found("Folder", {"Space Home Page Id": "%d" % self.space_home_page_id})
                 break  # Exit the loop on 404
-            else:                
-                for item in response.data["results"]:
-                    if item["title"] == folder_name and item["type"] == "folder":
-                        folder_id = int(item["id"])
-                        break
 
-                base = response.data.get("_links", {}).get("base", None)
-                url = response.data.get("_links", {}).get("next", None)
+            for item in response.data["results"]:
+                if item["title"] == folder_name and item["type"] == "folder":
+                    folder_id = int(item["id"])
+                    break
 
-                if url and base:
-                    base = base.replace("/wiki", "")
-                    url = urllib.parse.urljoin(base, url)
+            base = response.data.get("_links", {}).get("base", None)
+            url = response.data.get("_links", {}).get("next", None)
 
             if not url:
                 break
+
+            if base:
+                base = base.replace("/wiki", "")
+                url = urllib.parse.urljoin(base, url)
 
 
         return folder_id

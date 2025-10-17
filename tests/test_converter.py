@@ -257,3 +257,272 @@ def test_process_links_complex_anchor_refs():
     expected_replacement = '<a href="https://example.com/wiki/spaces/COMPLEX/pages/98765/Complex+Test+Page#Complex-Section-With-Numbers-123" title="Complex Section">Complex Section</a>'
     
     assert expected_replacement in result
+
+
+def test_process_headers_editor_v1_basic():
+    """Test process_headers function with editor version 1 basic functionality"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 1)
+    
+    headers = ["Section 1", "Section 2", "Another Section"]
+    ref_prefix = "#"
+    ref_postfix = ".%s"
+    
+    result = converter.process_headers(ref_prefix, ref_postfix, headers)
+    
+    expected = {
+        "#section-1": "Section1",
+        "#section-2": "Section2", 
+        "#another-section": "AnotherSection"
+    }
+    
+    assert result == expected
+
+
+def test_process_headers_editor_v2_basic():
+    """Test process_headers function with editor version 2 basic functionality"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    headers = ["Section 1", "Section 2", "Another Section"]
+    ref_prefix = "#"
+    ref_postfix = ".%s"
+    
+    result = converter.process_headers(ref_prefix, ref_postfix, headers)
+    
+    expected = {
+        "#section-1": "Section-1",
+        "#section-2": "Section-2",
+        "#another-section": "Another-Section"
+    }
+    
+    assert result == expected
+
+
+def test_process_headers_with_html_tags_v1():
+    """Test process_headers function with HTML tags in headers for editor v1"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 1)
+    
+    headers = ["<strong>Bold</strong> Section", "<em>Italic</em> Text", "<code>Code</code> Block"]
+    ref_prefix = "#"
+    ref_postfix = ".%s"
+    
+    result = converter.process_headers(ref_prefix, ref_postfix, headers)
+    
+    expected = {
+        "#bold-section": "Section",
+        "#italic-text": "Text",
+        "#code-block": "Block"
+    }
+    
+    assert result == expected
+
+
+def test_process_headers_with_html_tags_v2():
+    """Test process_headers function with HTML tags in headers for editor v2"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    headers = ["<strong>Bold</strong> Section", "<em>Italic</em> Text", "<code>Code</code> Block"]
+    ref_prefix = "#"
+    ref_postfix = ".%s"
+    
+    result = converter.process_headers(ref_prefix, ref_postfix, headers)
+    
+    expected = {
+        "#bold-section": "Bold-Section",
+        "#italic-text": "Italic-Text", 
+        "#code-block": "Code-Block"
+    }
+    
+    assert result == expected
+
+
+def test_process_headers_with_duplicate_headers_v1():
+    """Test process_headers function with duplicate headers for editor v1"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 1)
+    
+    headers = ["Section 1", "Section 1", "Section 1"]
+    ref_prefix = "#"
+    ref_postfix = ".%s"
+    
+    result = converter.process_headers(ref_prefix, ref_postfix, headers)
+    
+    expected = {
+        "#section-1": "Section1",
+        "#section-1.1": "Section1.1",
+        "#section-1.2": "Section1.2"
+    }
+    
+    assert result == expected
+
+
+def test_process_headers_with_duplicate_headers_v2():
+    """Test process_headers function with duplicate headers for editor v2"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    headers = ["Section 1", "Section 1", "Section 1"]
+    ref_prefix = "#"
+    ref_postfix = ".%s"
+    
+    result = converter.process_headers(ref_prefix, ref_postfix, headers)
+    
+    expected = {
+        "#section-1": "Section-1",
+        "#section-1.1": "Section-1.1",
+        "#section-1.2": "Section-1.2"
+    }
+    
+    assert result == expected
+
+
+def test_process_headers_with_special_characters():
+    """Test process_headers function with special characters in headers"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    headers = ["Section #1", "Section @2", "Section $3!", "Section & More"]
+    ref_prefix = "#"
+    ref_postfix = ".%s"
+    
+    result = converter.process_headers(ref_prefix, ref_postfix, headers)
+    
+    expected = {
+        "#section-1": "Section-1",
+        "#section-2": "Section-2",
+        "#section-3": "Section-3",
+        "#section--more": "Section--More"
+    }
+    
+    assert result == expected
+
+
+def test_process_headers_with_numbers_and_mixed_case():
+    """Test process_headers function with numbers and mixed case"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    headers = ["API Version 2.0", "HTTPs Protocol", "JSONParser Class"]
+    ref_prefix = "#"
+    ref_postfix = ".%s"
+    
+    result = converter.process_headers(ref_prefix, ref_postfix, headers)
+    
+    expected = {
+        "#api-version-20": "API-Version-20",
+        "#https-protocol": "HTTPs-Protocol",
+        "#jsonparser-class": "JSONParser-Class"
+    }
+    
+    assert result == expected
+
+
+def test_process_headers_with_empty_headers():
+    """Test process_headers function with empty headers list"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    headers = []
+    ref_prefix = "#"
+    ref_postfix = ".%s"
+    
+    result = converter.process_headers(ref_prefix, ref_postfix, headers)
+    
+    assert result == {}
+
+
+def test_process_headers_with_spaces_only_v1():
+    """Test process_headers function with headers containing only spaces for editor v1"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 1)
+    
+    headers = ["  Multiple   Spaces  ", "Tab\tCharacters", "Newline\nCharacter"]
+    ref_prefix = "#"
+    ref_postfix = ".%s"
+    
+    result = converter.process_headers(ref_prefix, ref_postfix, headers)
+    
+    expected = {
+        "#--multiple---spaces--": "MultipleSpaces",
+        "#tabcharacters": "Tab\tCharacters",
+        "#newlinecharacter": "Newline\nCharacter"
+    }
+    
+    assert result == expected
+
+
+def test_process_headers_with_custom_prefix_postfix():
+    """Test process_headers function with custom prefix and postfix"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    headers = ["Section A", "Section A", "Section B"]
+    ref_prefix = "custom-"
+    ref_postfix = "-v%s"
+    
+    result = converter.process_headers(ref_prefix, ref_postfix, headers)
+    
+    expected = {
+        "custom-section-a": "Section-A",
+        "custom-section-a-v1": "Section-A.1",
+        "custom-section-b": "Section-B"
+    }
+    
+    assert result == expected
+
+
+def test_process_headers_unicode_characters():
+    """Test process_headers function with unicode characters"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    headers = ["Café Section", "Naïve Approach", "Résumé Overview"]
+    ref_prefix = "#"
+    ref_postfix = ".%s"
+    
+    result = converter.process_headers(ref_prefix, ref_postfix, headers)
+    
+    expected = {
+        "#caf-section": "Caf-Section",
+        "#nave-approach": "Nave-Approach",
+        "#rsum-overview": "Rsum-Overview"
+    }
+    
+    assert result == expected
+
+
+def test_process_headers_complex_html_structure_v1():
+    """Test process_headers function with complex HTML structure for editor v1"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 1)
+    
+    headers = [
+        "<h1><strong>Main</strong> <em>Title</em></h1>",
+        "<span class='highlight'>Important</span> Section",
+        "<a href='#'>Linked</a> Header"
+    ]
+    ref_prefix = "#"
+    ref_postfix = ".%s"
+    
+    result = converter.process_headers(ref_prefix, ref_postfix, headers)
+    
+    expected = {
+        "#main-title": "",
+        "#important-section": "Section",
+        "#linked-header": "Header"
+    }
+    
+    assert result == expected
+
+
+def test_process_headers_complex_html_structure_v2():
+    """Test process_headers function with complex HTML structure for editor v2"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    headers = [
+        "<h1><strong>Main</strong> <em>Title</em></h1>",
+        "<span class='highlight'>Important</span> Section", 
+        "<a href='#'>Linked</a> Header"
+    ]
+    ref_prefix = "#"
+    ref_postfix = ".%s"
+    
+    result = converter.process_headers(ref_prefix, ref_postfix, headers)
+    
+    expected = {
+        "#main-title": "Main-Title",
+        "#important-section": "Important-Section",
+        "#linked-header": "Linked-Header"
+    }
+    
+    assert result == expected
