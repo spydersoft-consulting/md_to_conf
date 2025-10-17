@@ -51,6 +51,8 @@ class MarkdownConverter:
         if not has_title:
             html = "\n".join(html.split("\n")[1:])
 
+        LOGGER.debug("HTML pre processing")
+        LOGGER.debug(html)
         html = self.create_table_of_content(html)
         html = self.convert_info_macros(html)
         html = self.convert_comment_block(html)
@@ -199,14 +201,25 @@ class MarkdownConverter:
             modified html string
         """
         info_tag = '<p><ac:structured-macro ac:name="info"><ac:rich-text-body><p>'
-        note_tag = info_tag.replace("info", "note")
-        warning_tag = info_tag.replace("info", "warning")
+        ## Warning (Yellow Caution Icon) is named 'note' in Confluence
+        warning_tag = info_tag.replace("info", "note")
+        ## Success (Green Check Icon) is named 'tip' in Confluence
+        success_tag = info_tag.replace("info", "tip")
+        ## Error (Red Cross Icon) is named 'warning' in Confluence
+        error_tag = info_tag.replace("info", "warning")
         close_tag = "</p></ac:rich-text-body></ac:structured-macro></p>"
+
+        note_tag = '<ac:adf-extension><ac:adf-node type=\"panel\"><ac:adf-attribute key=\"panel-type\">note</ac:adf-attribute><ac:adf-content><p>'
+        note_close = '</p></ac:adf-content></ac:adf-node></ac:adf-extension>'
+
 
         # Custom tags converted into macros
         html = html.replace("<p>~?", info_tag).replace("?~</p>", close_tag)
-        html = html.replace("<p>~!", note_tag).replace("!~</p>", close_tag)
         html = html.replace("<p>~%", warning_tag).replace("%~</p>", close_tag)
+        html = html.replace("<p>~^", success_tag).replace("^~</p>", close_tag)
+        html = html.replace("<p>~$", error_tag).replace("$~</p>", close_tag)
+
+        html = html.replace("<p>~!", note_tag).replace("!~</p>", note_close)
 
         # Convert block quotes into macros
         quotes = re.findall("<blockquote>(.*?)</blockquote>", html, re.DOTALL)
@@ -214,12 +227,14 @@ class MarkdownConverter:
             for quote in quotes:
                 note = re.search("^<.*>Note", quote.strip(), re.IGNORECASE)
                 warning = re.search("^<.*>Warning", quote.strip(), re.IGNORECASE)
+                success = re.search("^<.*>Success", quote.strip(), re.IGNORECASE)
+                error = re.search("^<.*>Error", quote.strip(), re.IGNORECASE)
 
                 if note:
                     clean_tag = self.strip_type(quote, "Note")
                     macro_tag = (
                         clean_tag.replace("<p>", note_tag)
-                        .replace("</p>", close_tag)
+                        .replace("</p>", note_close)
                         .strip()
                     )
                 elif warning:
@@ -229,6 +244,20 @@ class MarkdownConverter:
                         .replace("</p>", close_tag)
                         .strip()
                     )
+                elif success:
+                    clean_tag = self.strip_type(quote, "Success")
+                    macro_tag = (
+                        clean_tag.replace("<p>", success_tag)
+                        .replace("</p>", close_tag)
+                        .strip()
+                    )
+                elif error:
+                    clean_tag = self.strip_type(quote, "Error")
+                    macro_tag = (
+                        clean_tag.replace("<p>", error_tag)
+                        .replace("</p>", close_tag)
+                        .strip()
+                    )    
                 else:
                     macro_tag = (
                         quote.replace("<p>", info_tag)

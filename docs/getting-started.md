@@ -134,17 +134,33 @@ Block quotes in Markdown are rendered as information macros.
 ![macros](images/noteMacro.png)
 
 ```less
+> Success: This is a success
+```
+
+![macros](images/successMacro.png)
+
+```less
 > Warning: This is a warning
 ```
 
 ![macros](images/warningMacro.png)
+
+```less
+> Error: This is an error
+```
+
+![macros](images/errorMacro.png)
 
 Alternatively, using a custom Markdown syntax also works:
 
 ```less
 ~?This is an info.?~
 
-~!This is a note.!~
-
 ~%This is a warning.%~
+
+~^This is a success.^~
+
+~$This is an error.$~
+
+~!This is a note.!~
 ```

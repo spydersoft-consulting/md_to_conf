@@ -91,10 +91,14 @@
   </ol>
   <p>Text above Info</p>
   <p><ac:structured-macro ac:name="info"><ac:rich-text-body><p>This should be an info block</p></ac:rich-text-body></ac:structured-macro></p>
-  <p>Text above Note</p>
-  <p><ac:structured-macro ac:name="note"><ac:rich-text-body><p>This should be a note block</p></ac:rich-text-body></ac:structured-macro></p>
   <p>Text above warning</p>
-  <p><ac:structured-macro ac:name="warning"><ac:rich-text-body><p>This should be a warning block</p></ac:rich-text-body></ac:structured-macro></p>
+  <p><ac:structured-macro ac:name="note"><ac:rich-text-body><p>This should be a warning block</p></ac:rich-text-body></ac:structured-macro></p>
+  <p>Text above success</p>
+  <p><ac:structured-macro ac:name="tip"><ac:rich-text-body><p>This should be a success block</p></ac:rich-text-body></ac:structured-macro></p>
+  <p>Text above error</p>
+  <p><ac:structured-macro ac:name="warning"><ac:rich-text-body><p>This should be a error block</p></ac:rich-text-body></ac:structured-macro></p>
+  <p>Text above Note</p>
+  <ac:adf-extension><ac:adf-node type="panel"><ac:adf-attribute key="panel-type">note</ac:adf-attribute><ac:adf-content>This should be a note block</ac:adf-content></ac:adf-node></ac:adf-extension>
   <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">none</ac:parameter><ac:plain-text-body><![CDATA[This is a code block with on language assigned
   ]]></ac:plain-text-body></ac:structured-macro>
   <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">javascript</ac:parameter><ac:plain-text-body><![CDATA[var block = has_javascript_lang();
@@ -148,10 +152,14 @@
   </ol>
   <p>Text above Info</p>
   <p><ac:structured-macro ac:name="info"><ac:rich-text-body><p>This should be an info block</p></ac:rich-text-body></ac:structured-macro></p>
-  <p>Text above Note</p>
-  <p><ac:structured-macro ac:name="note"><ac:rich-text-body><p>This should be a note block</p></ac:rich-text-body></ac:structured-macro></p>
   <p>Text above warning</p>
-  <p><ac:structured-macro ac:name="warning"><ac:rich-text-body><p>This should be a warning block</p></ac:rich-text-body></ac:structured-macro></p>
+  <p><ac:structured-macro ac:name="note"><ac:rich-text-body><p>This should be a warning block</p></ac:rich-text-body></ac:structured-macro></p>
+  <p>Text above success</p>
+  <p><ac:structured-macro ac:name="tip"><ac:rich-text-body><p>This should be a success block</p></ac:rich-text-body></ac:structured-macro></p>
+  <p>Text above error</p>
+  <p><ac:structured-macro ac:name="warning"><ac:rich-text-body><p>This should be a error block</p></ac:rich-text-body></ac:structured-macro></p>
+  <p>Text above Note</p>
+  <ac:adf-extension><ac:adf-node type="panel"><ac:adf-attribute key="panel-type">note</ac:adf-attribute><ac:adf-content>This should be a note block</ac:adf-content></ac:adf-node></ac:adf-extension>
   <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">none</ac:parameter><ac:plain-text-body><![CDATA[This is a code block with on language assigned
   ]]></ac:plain-text-body></ac:structured-macro>
   <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">javascript</ac:parameter><ac:plain-text-body><![CDATA[var block = has_javascript_lang();
