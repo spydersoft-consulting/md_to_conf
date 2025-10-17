@@ -214,7 +214,7 @@ class ConfluenceConverter:
             return html
 
         html = converter.process_links(
-            html, links, headers_map, space_id, page_id, title
+            html, links, headers_map, self.space_key, page_id, title
         )
 
         return html
