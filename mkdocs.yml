@@ -5,6 +5,10 @@ site_url: https://spydersoft-consulting.github.io/md_to_conf/
 nav:
   - Home: 'index.md'
   - 'getting-started.md'
+  - Markdown :
+    - 'Quick Reference': 'markdown-quick-reference.md'
+    - 'Syntax': 'markdown-syntax.md'
+    - 'Examples': 'markdown-examples.md'
   - Contribute: 'contributing.md'
   - Changes: 'CHANGELOG.md'
   - 'API Documentation':

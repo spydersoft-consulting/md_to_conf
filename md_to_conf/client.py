@@ -89,6 +89,7 @@ class ConfluenceApiClient:
         self.confluence_api_url = confluence_api_url
         self.space_key = space_key
         self.space_id = -1
+        self.space_home_page_id = -1
         self.editor_version = editor_version
         self.use_ssl = use_ssl
 
@@ -226,6 +227,7 @@ class ConfluenceApiClient:
         else:
             if len(response.data["results"]) >= 1:
                 self.space_id = int(response.data["results"][0]["id"])
+                self.space_home_page_id = int(response.data["results"][0]["homepageId"])
 
         return self.space_id
 
@@ -355,6 +357,48 @@ class ConfluenceApiClient:
             return response.data["results"]
 
         return []
+
+    def get_folder(self, folder_name: str) -> int:
+        """
+        Get folder information for the given folder name
+
+        Args:
+            folder_name: Title of the folder to search for.
+
+        """
+
+        # This call populates self.space_home_page_id
+        self.get_space_id()
+
+        LOGGER.debug("\tRetrieving folder information: %s", folder_name)
+        url = "%s/api/v2/pages/%d/descendants?depth=5" % (self.confluence_api_url, self.space_home_page_id)
+        
+        folder_id = 0
+
+        while True: 
+            LOGGER.debug("Requesting URL for Folder: %s", url)
+            response = self.check_errors_and_get_json(self.get_session(retry=True).get(url))
+            if response.status_code == 404:
+                self.log_not_found("Folder", {"Space Home Page Id": "%d" % self.space_home_page_id})
+                break  # Exit the loop on 404
+
+            for item in response.data["results"]:
+                if item["title"] == folder_name and item["type"] == "folder":
+                    folder_id = int(item["id"])
+                    break
+
+            base = response.data.get("_links", {}).get("base", None)
+            url = response.data.get("_links", {}).get("next", None)
+
+            if not url:
+                break
+
+            if base:
+                base = base.replace("/wiki", "")
+                url = urllib.parse.urljoin(base, url)
+
+
+        return folder_id
 
     def update_page_property(self, page_id: int, page_property) -> bool:
         """

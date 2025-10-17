@@ -127,14 +127,17 @@ class TestConfluenceConverter:
         )
 
     def test_get_parent_page_with_ancestor(self, confluence_converter):
-        """Test get_parent_page with ancestor"""
+        """Test get_parent_page with ancestor page found"""
         mock_page = PageInfo(id=123, spaceId=1, version=1, link="test-link")
         confluence_converter.confluence_client.get_page.return_value = mock_page
+        confluence_converter.confluence_client.get_folder = Mock()
         
         parent_id = confluence_converter.get_parent_page()
         
         assert parent_id == 123
         confluence_converter.confluence_client.get_page.assert_called_once_with("ancestor-page")
+        # get_folder should not be called when page is found
+        confluence_converter.confluence_client.get_folder.assert_not_called()
 
     def test_get_parent_page_without_ancestor(self, confluence_converter):
         """Test get_parent_page without ancestor"""
@@ -145,12 +148,51 @@ class TestConfluenceConverter:
         assert parent_id == 0
 
     def test_get_parent_page_ancestor_not_found(self, confluence_converter):
-        """Test get_parent_page when ancestor page doesn't exist"""
+        """Test get_parent_page when ancestor page doesn't exist but folder does"""
         confluence_converter.confluence_client.get_page.return_value = None
+        confluence_converter.confluence_client.get_folder.return_value = 456
         
         parent_id = confluence_converter.get_parent_page()
         
-        assert parent_id == 0
+        assert parent_id == 456
+        confluence_converter.confluence_client.get_page.assert_called_once_with("ancestor-page")
+        confluence_converter.confluence_client.get_folder.assert_called_once_with("ancestor-page")
+
+    def test_get_parent_page_ancestor_page_with_zero_id(self, confluence_converter):
+        """Test get_parent_page when ancestor page exists but has id=0, then finds folder"""
+        mock_page = PageInfo(id=0, spaceId=1, version=1, link="test-link")
+        confluence_converter.confluence_client.get_page.return_value = mock_page
+        confluence_converter.confluence_client.get_folder.return_value = 789
+        
+        parent_id = confluence_converter.get_parent_page()
+        
+        assert parent_id == 789
+        confluence_converter.confluence_client.get_page.assert_called_once_with("ancestor-page")
+        confluence_converter.confluence_client.get_folder.assert_called_once_with("ancestor-page")
+
+    def test_get_parent_page_neither_page_nor_folder_found(self, confluence_converter):
+        """Test get_parent_page when neither ancestor page nor folder exists"""
+        confluence_converter.confluence_client.get_page.return_value = None
+        confluence_converter.confluence_client.get_folder.return_value = 0
+        
+        with patch('md_to_conf.confluence_converter.LOGGER') as mock_logger:
+            parent_id = confluence_converter.get_parent_page()
+            
+            assert parent_id == 0
+            confluence_converter.confluence_client.get_page.assert_called_once_with("ancestor-page")
+            confluence_converter.confluence_client.get_folder.assert_called_once_with("ancestor-page")
+            mock_logger.error.assert_called_once_with("Error: Parent page/folder does not exist: %s", "ancestor-page")
+
+    def test_get_parent_page_folder_found_after_page_not_found(self, confluence_converter):
+        """Test get_parent_page when page is not found but folder is found"""
+        confluence_converter.confluence_client.get_page.return_value = None
+        confluence_converter.confluence_client.get_folder.return_value = 999
+        
+        parent_id = confluence_converter.get_parent_page()
+        
+        assert parent_id == 999
+        confluence_converter.confluence_client.get_page.assert_called_once_with("ancestor-page")
+        confluence_converter.confluence_client.get_folder.assert_called_once_with("ancestor-page")
 
     def test_add_images(self, confluence_converter):
         """Test add_images method"""
