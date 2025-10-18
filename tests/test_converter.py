@@ -715,3 +715,267 @@ def test_github_alerts_integration_example():
     assert 'virtual environments' in result
     assert 'backup your data' in result
     assert 'cannot be undone' in result
+
+
+def test_process_refs_basic_footnote():
+    """Test basic footnote processing with single footnote"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '<p>This text has a footnote[^1].</p>\n[^1]: This is footnote definition with <a href="http://example.com">link</a>.'
+    
+    result = converter.process_refs(html)
+    
+    # Should convert [^1] to superscript link and remove footnote definition
+    assert '<a id="test" href="http://example.com"><sup>1</sup></a>' in result
+    assert 'This text has a footnote' in result
+    assert '[^1]: This is footnote definition' not in result
+
+
+def test_process_refs_multiple_footnotes():
+    """Test footnote processing with multiple footnotes"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '''<p>First footnote[^1] and second footnote[^2].</p>
+[^1]: First footnote with <a href="http://example1.com">link1</a>.
+[^2]: Second footnote with <a href="http://example2.com">link2</a>.'''
+    
+    result = converter.process_refs(html)
+    
+    # Should convert both footnotes
+    assert '<a id="test" href="http://example1.com"><sup>1</sup></a>' in result
+    assert '<a id="test" href="http://example2.com"><sup>2</sup></a>' in result
+    assert 'First footnote[^1]' not in result
+    assert 'second footnote[^2]' not in result
+    assert '[^1]: First footnote' not in result
+    assert '[^2]: Second footnote' not in result
+
+
+def test_process_refs_footnote_in_paragraph_tags():
+    """Test footnote processing when footnote definition is wrapped in paragraph tags"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '<p>Text with footnote[^1].</p><p>[^1]: Definition with <a href="http://example.com">link</a>.</p>'
+    
+    result = converter.process_refs(html)
+    
+    # Should handle footnote definition in paragraph tags
+    assert '<a id="test" href="http://example.com"><sup>1</sup></a>' in result
+    assert 'Text with footnote' in result
+    assert '[^1]: Definition' not in result
+
+
+def test_process_refs_mixed_paragraph_and_newline_footnotes():
+    """Test footnote processing with mixed format footnote definitions"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '''<p>Text with footnote[^1] and another[^2].</p>
+[^1]: Newline footnote with <a href="http://example1.com">link1</a>.
+<p>[^2]: Paragraph footnote with <a href="http://example2.com">link2</a>.</p>'''
+    
+    result = converter.process_refs(html)
+    
+    # Should handle both formats
+    assert '<a id="test" href="http://example1.com"><sup>1</sup></a>' in result
+    assert '<a id="test" href="http://example2.com"><sup>2</sup></a>' in result
+    assert '[^1]: Newline footnote' not in result
+    assert '[^2]: Paragraph footnote' not in result
+
+
+def test_process_refs_footnote_with_complex_link():
+    """Test footnote processing with complex link attributes"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '''<p>Text with footnote[^1].</p>
+[^1]: Complex footnote with <a href="http://example.com?param=value&amp;other=test" title="Example Link" target="_blank">complex link</a>.'''
+    
+    result = converter.process_refs(html)
+    
+    # Should extract href correctly from complex link
+    assert '<a id="test" href="http://example.com?param=value&amp;other=test"><sup>1</sup></a>' in result
+    assert '[^1]: Complex footnote' not in result
+
+
+def test_process_refs_footnote_with_multiple_links():
+    """Test footnote processing when footnote definition has multiple links"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '''<p>Text with footnote[^1].</p>
+[^1]: Footnote with <a href="http://first.com">first link</a> and <a href="http://second.com">second link</a>.'''
+    
+    result = converter.process_refs(html)
+    
+    # Should use the first href found
+    assert '<a id="test" href="http://first.com"><sup>1</sup></a>' in result
+    assert '[^1]: Footnote with' not in result
+
+
+def test_process_refs_no_footnotes():
+    """Test process_refs when there are no footnotes in the HTML"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '<p>This is just regular text without any footnotes.</p>'
+    
+    result = converter.process_refs(html)
+    
+    # Should return unchanged HTML
+    assert result == html
+
+
+def test_process_refs_footnote_reference_without_definition():
+    """Test process_refs with footnote reference but no definition"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '<p>Text with footnote[^1] but no definition.</p>'
+    
+    result = converter.process_refs(html)
+    
+    # Should return unchanged since no footnote definitions found
+    assert result == html
+    assert '[^1]' in result
+
+
+def test_process_refs_footnote_definition_without_reference():
+    """Test process_refs with footnote definition but no reference"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '''<p>Text without footnote reference.</p>
+[^1]: Orphaned footnote definition with <a href="http://example.com">link</a>.'''
+    
+    result = converter.process_refs(html)
+    
+    # Should remove the footnote definition but leave text unchanged
+    assert 'Text without footnote reference.' in result
+    assert '[^1]: Orphaned footnote' not in result
+
+
+def test_process_refs_reused_footnote_references():
+    """Test footnote processing with the same footnote referenced multiple times"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '''<p>First reference[^1] and second reference[^1] to same footnote.</p>
+[^1]: Shared footnote with <a href="http://example.com">link</a>.'''
+    
+    result = converter.process_refs(html)
+    
+    # Both references should be converted to the same superscript link
+    expected_link = '<a id="test" href="http://example.com"><sup>1</sup></a>'
+    assert result.count(expected_link) == 2
+    assert '[^1]: Shared footnote' not in result
+
+
+def test_process_refs_higher_numbered_footnotes():
+    """Test footnote processing with higher numbered footnotes"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '''<p>Text with footnote[^5] and another[^9].</p>
+[^5]: Fifth footnote with <a href="http://example5.com">link5</a>.
+[^9]: Ninth footnote with <a href="http://example9.com">link9</a>.'''
+    
+    result = converter.process_refs(html)
+    
+    # Should handle higher numbers correctly
+    assert '<a id="test" href="http://example5.com"><sup>5</sup></a>' in result
+    assert '<a id="test" href="http://example9.com"><sup>9</sup></a>' in result
+    assert '[^5]: Fifth footnote' not in result
+    assert '[^9]: Ninth footnote' not in result
+
+
+def test_process_refs_footnote_with_no_href():
+    """Test process_refs behavior when footnote definition has no href"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '''<p>Text with footnote[^1].</p>
+[^1]: Footnote without href link, just plain text.'''
+    
+    # This should raise an AttributeError when trying to access .group(1) on None
+    with pytest.raises(AttributeError):
+        converter.process_refs(html)
+
+
+def test_process_refs_footnote_with_empty_href():
+    """Test footnote processing with empty href attribute"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '''<p>Text with footnote[^1].</p>
+[^1]: Footnote with <a href="">empty href</a>.'''
+    
+    result = converter.process_refs(html)
+    
+    # Should handle empty href
+    assert '<a id="test" href=""><sup>1</sup></a>' in result
+    assert '[^1]: Footnote with' not in result
+
+
+def test_process_refs_footnote_with_relative_url():
+    """Test footnote processing with relative URL"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '''<p>Text with footnote[^1].</p>
+[^1]: Footnote with <a href="/relative/path">relative link</a>.'''
+    
+    result = converter.process_refs(html)
+    
+    # Should preserve relative URL
+    assert '<a id="test" href="/relative/path"><sup>1</sup></a>' in result
+    assert '[^1]: Footnote with' not in result
+
+
+def test_process_refs_footnote_with_anchor_link():
+    """Test footnote processing with anchor/fragment URL"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '''<p>Text with footnote[^1].</p>
+[^1]: Footnote with <a href="#section-anchor">anchor link</a>.'''
+    
+    result = converter.process_refs(html)
+    
+    # Should preserve anchor URL
+    assert '<a id="test" href="#section-anchor"><sup>1</sup></a>' in result
+    assert '[^1]: Footnote with' not in result
+
+
+def test_process_refs_footnote_definition_with_html_formatting():
+    """Test footnote processing when definition contains HTML formatting"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '''<p>Text with footnote[^1].</p>
+[^1]: Footnote with <strong>bold</strong> and <em>italic</em> text plus <a href="http://example.com">link</a>.'''
+    
+    result = converter.process_refs(html)
+    
+    # Should extract href and remove entire footnote definition including formatting
+    assert '<a id="test" href="http://example.com"><sup>1</sup></a>' in result
+    assert '[^1]: Footnote with <strong>bold</strong>' not in result
+    assert '<strong>bold</strong>' not in result  # Entire footnote definition should be removed
+
+
+def test_process_refs_integration_example():
+    """Integration test showing footnotes in a realistic document"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '''<h1>Research Paper</h1>
+<p>According to recent studies[^1], the technique has been proven effective. However, some researchers disagree[^2].</p>
+<p>Additional evidence can be found in multiple sources[^1][^3].</p>
+[^1]: Smith, J. (2023). <a href="http://journal.example.com/article1">Effective Techniques in Modern Research</a>. Journal of Science.
+[^2]: Brown, A. (2023). <a href="http://journal.example.com/article2">Questioning Modern Research Methods</a>. Critical Review.
+[^3]: Davis, M. (2023). <a href="http://journal.example.com/article3">Supporting Evidence for New Techniques</a>. Research Today.'''
+    
+    result = converter.process_refs(html)
+    
+    # Should convert all footnote references and remove all definitions
+    assert '<a id="test" href="http://journal.example.com/article1"><sup>1</sup></a>' in result
+    assert '<a id="test" href="http://journal.example.com/article2"><sup>2</sup></a>' in result
+    assert '<a id="test" href="http://journal.example.com/article3"><sup>3</sup></a>' in result
+    
+    # Multiple references to same footnote should all be converted
+    assert result.count('<a id="test" href="http://journal.example.com/article1"><sup>1</sup></a>') == 2
+    
+    # All footnote definitions should be removed
+    assert '[^1]: Smith, J.' not in result
+    assert '[^2]: Brown, A.' not in result
+    assert '[^3]: Davis, M.' not in result
+    
+    # Main content should be preserved
+    assert 'Research Paper' in result
+    assert 'recent studies' in result
+    assert 'some researchers disagree' in result
