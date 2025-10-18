@@ -10,6 +10,9 @@ import requests
 
 LOGGER = logging.getLogger(__name__)
 
+# Constants for SonarQube rule S1192 - string literals should not be duplicated
+PAGE_ID_KEY = "Page Id"
+
 
 class CheckedResponse(typing.NamedTuple):
     """
@@ -196,7 +199,7 @@ class ConfluenceApiClient:
         )
 
         if response.status_code == 404:
-            self.log_not_found("Page", {"Page Id": "%d" % page_id})
+            self.log_not_found("Page", {PAGE_ID_KEY: "%d" % page_id})
             return False
 
         if response.status_code == 200:
@@ -352,7 +355,7 @@ class ConfluenceApiClient:
 
         response = self.check_errors_and_get_json(self.get_session(retry=True).get(url))
         if response.status_code == 404:
-            self.log_not_found("Page Properties", {"Page Id": "%d" % page_id})
+            self.log_not_found("Page Properties", {PAGE_ID_KEY: "%d" % page_id})
         else:
             return response.data["results"]
 
@@ -477,9 +480,12 @@ class ConfluenceApiClient:
         )
 
         response = self.check_errors_and_get_json(self.get_session().get(url))
-        
+
         if response.status_code == 404:
-            self.log_not_found("Attachment", {"Page Id": "%d" % page_id, "Filename": filename})
+            self.log_not_found(
+                "Attachment",
+                {PAGE_ID_KEY: "%d" % page_id, "Filename": filename}
+            )
             return ""
 
         if len(response.data["results"]) >= 1:
@@ -615,7 +621,7 @@ class ConfluenceApiClient:
             LOGGER.error(
                 "Error: Error finding existing labels. Check the following are correct:"
             )
-            LOGGER.error("\tPage Id : %d", page_id)
+            LOGGER.error("\t%s : %d", PAGE_ID_KEY, page_id)
             LOGGER.error("\tURL: %s", self.confluence_api_url)
             return False
 
@@ -627,7 +633,7 @@ class ConfluenceApiClient:
                     found = True
 
             if not found:
-                LOGGER.info("Adding Label '%s' to Page Id %d", label, page_id)
+                LOGGER.info("Adding Label '%s' to %s %d", label, PAGE_ID_KEY, page_id)
                 self.add_label(page_id, label)
 
             LOGGER.debug("property data: %s", str(data["results"]))
