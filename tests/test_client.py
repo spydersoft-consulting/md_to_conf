@@ -245,6 +245,22 @@ def test_delete_page_success(mock_get_session, test_client):
 
 
 @patch("md_to_conf.client.ConfluenceApiClient.get_session")
+def test_delete_page_failure(mock_get_session, test_client):
+    """Test delete_page when status code is not 204 (line 297)"""
+    mock_session = Mock()
+    mock_response = Mock()
+    mock_response.status_code = 400  # Not 204
+    mock_response.raise_for_status.return_value = None
+    mock_session.delete.return_value = mock_response
+    mock_get_session.return_value = mock_session
+
+    test_client.delete_page(98765)
+    mock_session.delete.assert_called_once_with(
+        "https://domain.confluence.net/wiki/api/v2/pages/98765"
+    )
+
+
+@patch("md_to_conf.client.ConfluenceApiClient.get_session")
 @patch("md_to_conf.client.ConfluenceApiClient.check_errors_and_get_json")
 @patch("md_to_conf.client.ConfluenceApiClient.get_space_id")
 @patch("md_to_conf.client.ConfluenceApiClient.log_not_found")
@@ -447,26 +463,31 @@ def test_update_page_property_failure(mock_check_errors, mock_get_session, test_
 
 
 @patch("md_to_conf.client.ConfluenceApiClient.get_session")
-def test_get_attachment_found(mock_get_session, test_client):
-    mock_session = Mock()
-    mock_response = Mock()
-    mock_response.json.return_value = {"results": [{"id": "att123"}]}
-    mock_response.raise_for_status.return_value = None
-    mock_session.get.return_value = mock_response
-    mock_get_session.return_value = mock_session
+@patch("md_to_conf.client.ConfluenceApiClient.check_errors_and_get_json")
+def test_get_attachment_found(mock_check_errors, mock_get_session, test_client):
+    mock_check_errors.return_value = CheckedResponse(200, {"results": [{"id": "att123"}]})
 
     result = test_client.get_attachment(98765, "test.png")
     assert result == "att123"
 
 
 @patch("md_to_conf.client.ConfluenceApiClient.get_session")
-def test_get_attachment_not_found(mock_get_session, test_client):
-    mock_session = Mock()
-    mock_response = Mock()
-    mock_response.json.return_value = {"results": []}
-    mock_response.raise_for_status.return_value = None
-    mock_session.get.return_value = mock_response
-    mock_get_session.return_value = mock_session
+@patch("md_to_conf.client.ConfluenceApiClient.check_errors_and_get_json")
+@patch("md_to_conf.client.ConfluenceApiClient.log_not_found")
+def test_get_attachment_not_found_404(mock_log_not_found, mock_check_errors, mock_get_session, test_client):
+    """Test get_attachment when response is 404"""
+    mock_check_errors.return_value = CheckedResponse(404, {})
+
+    result = test_client.get_attachment(98765, "test.png")
+    assert result == ""
+    mock_log_not_found.assert_called_once_with("Attachment", {"Page Id": "98765", "Filename": "test.png"})
+
+
+@patch("md_to_conf.client.ConfluenceApiClient.get_session")
+@patch("md_to_conf.client.ConfluenceApiClient.check_errors_and_get_json")
+def test_get_attachment_empty_results(mock_check_errors, mock_get_session, test_client):
+    """Test get_attachment when results list is empty (lines 485-487)"""
+    mock_check_errors.return_value = CheckedResponse(200, {"results": []})
 
     result = test_client.get_attachment(98765, "test.png")
     assert result == ""
