@@ -717,6 +717,51 @@ def test_github_alerts_integration_example():
     assert 'cannot be undone' in result
 
 
+def test_convert_github_alerts_redos_resistance():
+    """Test that GitHub alerts processing is resistant to ReDoS attacks"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    # Create a potentially malicious input that could cause ReDoS with vulnerable regex
+    # This creates deeply nested structure that would cause catastrophic backtracking
+    malicious_content = "<p>" + "a" * 1000 + "</p>" * 100
+    html = f'<blockquote><p>[!NOTE] Content</p>{malicious_content}</blockquote>'
+    
+    # This should complete quickly without hanging
+    import time
+    start_time = time.time()
+    result = converter.convert_github_alerts(html)
+    end_time = time.time()
+    
+    # Should complete in well under a second
+    assert end_time - start_time < 1.0
+    
+    # Should still process the alert correctly
+    assert 'ac:structured-macro ac:name="info"' in result
+    assert 'Content' in result
+
+
+def test_convert_github_alerts_malformed_html_resistance():
+    """Test that GitHub alerts processing handles malformed HTML gracefully"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    # Test with unclosed tags and weird structures
+    malformed_cases = [
+        '<blockquote><p>[!NOTE] Content without closing p</blockquote>',
+        '<blockquote><p>[!TIP] Content<p>nested p</p></blockquote>',
+        '<blockquote><p>[!WARNING] Content</p><broken>tag</blockquote>',
+        '<blockquote><p>[!NOTE]</p></blockquote>',  # Empty content
+    ]
+    
+    for malformed_html in malformed_cases:
+        # Should not raise exceptions
+        try:
+            result = converter.convert_github_alerts(malformed_html)
+            # Should either convert or leave unchanged, but not crash
+            assert isinstance(result, str)
+        except Exception as e:
+            pytest.fail(f"convert_github_alerts raised {type(e).__name__}: {e} for input: {malformed_html}")
+
+
 def test_process_refs_basic_footnote():
     """Test basic footnote processing with single footnote"""
     converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)

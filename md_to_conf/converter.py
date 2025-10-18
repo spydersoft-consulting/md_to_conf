@@ -223,13 +223,31 @@ class MarkdownConverter:
         
         for quote in blockquotes:
             # Check for GitHub alert patterns at the start of the blockquote
-            github_alert_match = re.search(r"<p>\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(.*?)</p>(.*)", quote, re.IGNORECASE | re.DOTALL)
+            # Use a more specific pattern to avoid ReDoS while handling HTML content
+            if quote.strip().startswith('<p>[!'):
+                # Extract alert type
+                alert_match = re.search(r'<p>\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]', quote, re.IGNORECASE)
+                if alert_match:
+                    alert_type = alert_match.group(1).upper()
+                    
+                    # Find the content after the alert declaration
+                    content_start = alert_match.end()
+                    first_p_end = quote.find('</p>', content_start)
+                    
+                    if first_p_end != -1:
+                        # Extract first line content and remaining content
+                        first_line_content = quote[content_start:first_p_end].strip()
+                        remaining_content = quote[first_p_end + 4:].strip()  # Skip '</p>'
+                        
+                        github_alert_match = True
+                    else:
+                        github_alert_match = False
+                else:
+                    github_alert_match = False
+            else:
+                github_alert_match = False
             
             if github_alert_match:
-                alert_type = github_alert_match.group(1).upper()
-                first_line_content = github_alert_match.group(2).strip()
-                remaining_content = github_alert_match.group(3).strip()
-                
                 # Map GitHub alert types to Confluence macros
                 if alert_type == "NOTE":
                     macro_tag = info_tag
