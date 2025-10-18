@@ -1,9 +1,9 @@
 import pytest
 import os
 import tempfile
-from unittest.mock import Mock, patch, mock_open, MagicMock
+from unittest.mock import Mock, patch, mock_open
 from md_to_conf.confluence_converter import ConfluenceConverter
-from md_to_conf.client import ConfluenceApiClient, PageInfo
+from md_to_conf.client import PageInfo
 
 
 class TestConfluenceConverter:

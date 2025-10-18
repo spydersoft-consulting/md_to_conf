@@ -116,7 +116,10 @@ class MarkdownConverter:
         html = str.replace(
             html,
             r"<p>[TOC]</p>",
-            '<p><ac:structured-macro ac:name="toc-zone" ac:schema-version="1" data-layout="default"><ac:rich-text-body><ac:structured-macro ac:name="toc" ac:schema-version="1" data-layout="default"/></ac:rich-text-body></ac:structured-macro></p>',
+            '<p><ac:structured-macro ac:name="toc-zone" ac:schema-version="1" '
+            'data-layout="default"><ac:rich-text-body><ac:structured-macro '
+            'ac:name="toc" ac:schema-version="1" data-layout="default"/>'
+            '</ac:rich-text-body></ac:structured-macro></p>',
         )
 
         return html
@@ -278,7 +281,9 @@ class MarkdownConverter:
         close_tag = "</ac:rich-text-body></ac:structured-macro></p>"
 
         # Special note tag for IMPORTANT alerts (using ADF panel format)
-        note_tag = '<ac:adf-extension><ac:adf-node type="panel"><ac:adf-attribute key="panel-type">note</ac:adf-attribute><ac:adf-content>'
+        note_tag = ('<ac:adf-extension><ac:adf-node type="panel">'
+                    '<ac:adf-attribute key="panel-type">note</ac:adf-attribute>'
+                    '<ac:adf-content>')
         note_close = "</ac:adf-content></ac:adf-node></ac:adf-extension>"
 
         alert_mapping = {
@@ -347,16 +352,18 @@ class MarkdownConverter:
         html = self.convert_github_alerts(html)
 
         info_tag = '<p><ac:structured-macro ac:name="info"><ac:rich-text-body><p>'
-        ## Warning (Yellow Caution Icon) is named 'note' in Confluence
+        # Warning (Yellow Caution Icon) is named 'note' in Confluence
         warning_tag = info_tag.replace("info", "note")
-        ## Success (Green Check Icon) is named 'tip' in Confluence
+        # Success (Green Check Icon) is named 'tip' in Confluence
         success_tag = info_tag.replace("info", "tip")
-        ## Error (Red Cross Icon) is named 'warning' in Confluence
+        # Error (Red Cross Icon) is named 'warning' in Confluence
         error_tag = info_tag.replace("info", "warning")
         close_tag = "</p></ac:rich-text-body></ac:structured-macro></p>"
 
-        note_tag = '<ac:adf-extension><ac:adf-node type="panel"><ac:adf-attribute key="panel-type">note</ac:adf-attribute><ac:adf-content><p>'
-        note_close = "</p></ac:adf-content></ac:adf-node></ac:adf-extension>"
+        note_tag = ('<ac:adf-extension><ac:adf-node type="panel">'
+                    '<ac:adf-attribute key="panel-type">note</ac:adf-attribute>'
+                    '<ac:adf-content><p>')
+        note_close = '</p></ac:adf-content></ac:adf-node></ac:adf-extension>'
 
         # Custom tags converted into macros
         html = html.replace("<p>~?", info_tag).replace("?~</p>", close_tag)

@@ -54,32 +54,52 @@
 # ---
 # name: test_converter_html_advanced
   '''
+  <p><a href="#heading-3-2">Link to Heading</a></p>
   <h2>Heading 2</h2>
   <p>Some text for heading 2</p>
   <h3>Heading 3-1</h3>
   <p>Some text for heading 3-1</p>
   <h3>Heading 3-2</h3>
-  <h3>Github Style</h3>
+  <p>Some test for heading 3-2</p>
+  <ul>
+  <li>An</li>
+  <li>unordered</li>
+  <li>list</li>
+  </ul>
+  <ol>
+  <li>An</li>
+  <li>Ordered</li>
+  <li>List</li>
+  </ol>
+  <ul>
+  <li>This list is nested</li>
+  <li>This item has children<ul>
+  <li>This is a child of item 2</li>
+  <li>Another child of item 2</li>
+  </ul>
+  </li>
+  <li>This is the third item</li>
+  </ul>
+  <ol>
+  <li>This list is nested</li>
+  <li>This item has children<ol>
+  <li>This is a child of item 2</li>
+  <li>Another child of item 2</li>
+  </ol>
+  </li>
+  <li>This is the third item</li>
+  </ol>
+  <h3>Block Quote Conversion</h3>
   <p>Text above Info</p>
   <p><ac:structured-macro ac:name="info"><ac:rich-text-body><p>This is an info.</p></ac:rich-text-body></ac:structured-macro></p>
   <p>Text above warning</p>
   <p><ac:structured-macro ac:name="note"><ac:rich-text-body><p>This is a warning.</p></ac:rich-text-body></ac:structured-macro></p>
   <p>Text above success</p>
-  <p><ac:structured-macro ac:name="tip"><ac:rich-text-body><p>This is a tip in Github, but shows as a success block in confluence</p></ac:rich-text-body></ac:structured-macro></p>
+  <p><ac:structured-macro ac:name="tip"><ac:rich-text-body><p>This is a success.</p></ac:rich-text-body></ac:structured-macro></p>
   <p>Text above error</p>
   <p><ac:structured-macro ac:name="warning"><ac:rich-text-body><p>This is an error.</p></ac:rich-text-body></ac:structured-macro></p>
-  <p>Text above Important</p>
-  <ac:adf-extension><ac:adf-node type="panel"><ac:adf-attribute key="panel-type">note</ac:adf-attribute><ac:adf-content><p>This is an important panel.</p></ac:adf-content></ac:adf-node></ac:adf-extension>
-  <h3>Custom Panel Syntax</h3>
-  <p><ac:structured-macro ac:name="info"><ac:rich-text-body><p>This is an info.</p></ac:rich-text-body></ac:structured-macro></p>
-  <p><ac:structured-macro ac:name="note"><ac:rich-text-body><p>This is a warning.</p></ac:rich-text-body></ac:structured-macro></p>
-  <p><ac:structured-macro ac:name="tip"><ac:rich-text-body><p>This is a success.</p></ac:rich-text-body></ac:structured-macro></p>
-  <p><ac:structured-macro ac:name="warning"><ac:rich-text-body><p>This is an error.</p></ac:rich-text-body></ac:structured-macro></p>
+  <p>Text above Note</p>
   <ac:adf-extension><ac:adf-node type="panel"><ac:adf-attribute key="panel-type">note</ac:adf-attribute><ac:adf-content><p>This is a note.</p></ac:adf-content></ac:adf-node></ac:adf-extension>
-  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">none</ac:parameter><ac:plain-text-body><![CDATA[This is a code block with on language assigned
-  ]]></ac:plain-text-body></ac:structured-macro>
-  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">javascript</ac:parameter><ac:plain-text-body><![CDATA[var block = has_javascript_lang();
-  ]]></ac:plain-text-body></ac:structured-macro>
   '''
 # ---
 # name: test_converter_html_advanced_with_toc
@@ -92,32 +112,52 @@
   <ac:parameter ac:name="type">list</ac:parameter><ac:parameter ac:name="outline">false</ac:parameter>
   <ac:parameter ac:name="include"></ac:parameter>
   </ac:structured-macro>
+  <p><a href="#heading-3-2">Link to Heading</a></p>
   <h2>Heading 2</h2>
   <p>Some text for heading 2</p>
   <h3>Heading 3-1</h3>
   <p>Some text for heading 3-1</p>
   <h3>Heading 3-2</h3>
-  <h3>Github Style</h3>
+  <p>Some test for heading 3-2</p>
+  <ul>
+  <li>An</li>
+  <li>unordered</li>
+  <li>list</li>
+  </ul>
+  <ol>
+  <li>An</li>
+  <li>Ordered</li>
+  <li>List</li>
+  </ol>
+  <ul>
+  <li>This list is nested</li>
+  <li>This item has children<ul>
+  <li>This is a child of item 2</li>
+  <li>Another child of item 2</li>
+  </ul>
+  </li>
+  <li>This is the third item</li>
+  </ul>
+  <ol>
+  <li>This list is nested</li>
+  <li>This item has children<ol>
+  <li>This is a child of item 2</li>
+  <li>Another child of item 2</li>
+  </ol>
+  </li>
+  <li>This is the third item</li>
+  </ol>
+  <h3>Block Quote Conversion</h3>
   <p>Text above Info</p>
   <p><ac:structured-macro ac:name="info"><ac:rich-text-body><p>This is an info.</p></ac:rich-text-body></ac:structured-macro></p>
   <p>Text above warning</p>
   <p><ac:structured-macro ac:name="note"><ac:rich-text-body><p>This is a warning.</p></ac:rich-text-body></ac:structured-macro></p>
   <p>Text above success</p>
-  <p><ac:structured-macro ac:name="tip"><ac:rich-text-body><p>This is a tip in Github, but shows as a success block in confluence</p></ac:rich-text-body></ac:structured-macro></p>
+  <p><ac:structured-macro ac:name="tip"><ac:rich-text-body><p>This is a success.</p></ac:rich-text-body></ac:structured-macro></p>
   <p>Text above error</p>
   <p><ac:structured-macro ac:name="warning"><ac:rich-text-body><p>This is an error.</p></ac:rich-text-body></ac:structured-macro></p>
-  <p>Text above Important</p>
-  <ac:adf-extension><ac:adf-node type="panel"><ac:adf-attribute key="panel-type">note</ac:adf-attribute><ac:adf-content><p>This is an important panel.</p></ac:adf-content></ac:adf-node></ac:adf-extension>
-  <h3>Custom Panel Syntax</h3>
-  <p><ac:structured-macro ac:name="info"><ac:rich-text-body><p>This is an info.</p></ac:rich-text-body></ac:structured-macro></p>
-  <p><ac:structured-macro ac:name="note"><ac:rich-text-body><p>This is a warning.</p></ac:rich-text-body></ac:structured-macro></p>
-  <p><ac:structured-macro ac:name="tip"><ac:rich-text-body><p>This is a success.</p></ac:rich-text-body></ac:structured-macro></p>
-  <p><ac:structured-macro ac:name="warning"><ac:rich-text-body><p>This is an error.</p></ac:rich-text-body></ac:structured-macro></p>
+  <p>Text above Note</p>
   <ac:adf-extension><ac:adf-node type="panel"><ac:adf-attribute key="panel-type">note</ac:adf-attribute><ac:adf-content><p>This is a note.</p></ac:adf-content></ac:adf-node></ac:adf-extension>
-  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">none</ac:parameter><ac:plain-text-body><![CDATA[This is a code block with on language assigned
-  ]]></ac:plain-text-body></ac:structured-macro>
-  <ac:structured-macro ac:name="code"><ac:parameter ac:name="theme">Midnight</ac:parameter><ac:parameter ac:name="linenumbers">true</ac:parameter><ac:parameter ac:name="language">javascript</ac:parameter><ac:plain-text-body><![CDATA[var block = has_javascript_lang();
-  ]]></ac:plain-text-body></ac:structured-macro>
   '''
 # ---
 # name: test_toc_convert

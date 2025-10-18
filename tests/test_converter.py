@@ -16,12 +16,7 @@ def test_converter_advanced() -> MarkdownConverter:
 
 
 @pytest.fixture
-def test_converter_advanced() -> MarkdownConverter:
-    return MarkdownConverter("tests/testfiles/github-alerts.md", URL, "default", 2)
-
-
-@pytest.fixture
-def test_converter_advanced() -> MarkdownConverter:
+def test_converter_github_alerts() -> MarkdownConverter:
     return MarkdownConverter("tests/testfiles/github-alerts.md", URL, "default", 2)
 
 
@@ -94,7 +89,8 @@ def test_process_links_editor_v1():
     """Test process_links function with editor version 1"""
     converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 1)
 
-    html = '<p>See <a href="#section-1">Section 1</a> and <a href="#section-2">Section 2</a> for details</p>'
+    html = ('<p>See <a href="#section-1">Section 1</a> and '
+            '<a href="#section-2">Section 2</a> for details</p>')
     links = ['<a href="#section-1">Section 1</a>', '<a href="#section-2">Section 2</a>']
     headers_map = {"#section-1": "Section1", "#section-2": "Section2"}
     space_key = "TEST"
@@ -124,7 +120,20 @@ def test_process_links_editor_v2():
     """Test process_links function with editor version 2"""
     converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
 
-    html = '<p>See <a href="#section-1">Section 1</a> and <a href="#section-2">Section 2</a> for details</p>'
+    html = ('<p>See <a href="#section-1">Section 1</a> and '
+            '<a href="#section-2">Section 2</a> for details</p>')
+    links = ['<a href="#section-1">Section 1</a>', '<a href="#section-2">Section 2</a>']
+    headers_map = {"#section-1": "Section-1", "#section-2": "Section-2"}
+    space_key = "TEST"
+    page_id = 12345
+    title = "Test Page"
+
+    result = converter.process_links(html, links, headers_map, space_key, page_id, title)
+
+    expected_replacement1 = ('<a href="https://example.com/wiki/spaces/TEST/pages/12345/'
+                             'Test+Page#Section-1" title="Section 1">Section 1</a>')
+    expected_replacement2 = ('<a href="https://example.com/wiki/spaces/TEST/pages/12345/'
+                             'Test+Page#Section-2" title="Section 2">Section 2</a>')
     links = ['<a href="#section-1">Section 1</a>', '<a href="#section-2">Section 2</a>']
     headers_map = {"#section-1": "Section-1", "#section-2": "Section-2"}
     space_key = "TEST"
@@ -157,7 +166,8 @@ def test_process_links_with_title_spaces():
         html, links, headers_map, space_key, page_id, title
     )
 
-    expected_replacement = '<a href="https://example.com/wiki/spaces/TEST/pages/12345/Test+Page+With+Spaces#Section-1" title="Section 1">Section 1</a>'
+    expected_replacement = ('<a href="https://example.com/wiki/spaces/TEST/pages/12345/'
+                             'Test+Page+With+Spaces#Section-1" title="Section 1">Section 1</a>')
     assert expected_replacement in result
 
 

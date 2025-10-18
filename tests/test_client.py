@@ -1,9 +1,8 @@
 import pytest
 import logging
-import json
 from unittest.mock import Mock, patch, mock_open
 from md_to_conf import ConfluenceApiClient
-from md_to_conf.client import PageInfo, LabelInfo, CheckedResponse
+from md_to_conf.client import LabelInfo, CheckedResponse
 import requests
 
 
