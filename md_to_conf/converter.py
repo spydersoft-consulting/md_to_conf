@@ -207,6 +207,64 @@ class MarkdownConverter:
         Returns:
             modified html string with GitHub alerts converted to Confluence macros
         """
+        # Find all blockquotes that might contain GitHub alerts
+        blockquotes = re.findall(r"<blockquote>(.*?)</blockquote>", html, re.DOTALL)
+        
+        for quote in blockquotes:
+            parsed_alert = self._parse_github_alert(quote)
+            if parsed_alert:
+                replacement_macro = self._create_alert_macro(parsed_alert)
+                html = html.replace(f"<blockquote>{quote}</blockquote>", replacement_macro)
+        
+        return html
+
+    def _parse_github_alert(self, quote: str) -> dict:
+        """
+        Parse a blockquote to extract GitHub alert information.
+        
+        Args:
+            quote: The blockquote content
+            
+        Returns:
+            Dictionary with alert info if valid GitHub alert, None otherwise
+        """
+        if not quote.strip().startswith('<p>[!'):
+            return None
+            
+        # Extract alert type
+        alert_match = re.search(r'<p>\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]', quote, re.IGNORECASE)
+        if not alert_match:
+            return None
+            
+        alert_type = alert_match.group(1).upper()
+        
+        # Find the content after the alert declaration
+        content_start = alert_match.end()
+        first_p_end = quote.find('</p>', content_start)
+        
+        if first_p_end == -1:
+            return None
+            
+        # Extract first line content and remaining content
+        first_line_content = quote[content_start:first_p_end].strip()
+        remaining_content = quote[first_p_end + 4:].strip()  # Skip '</p>'
+        
+        return {
+            'alert_type': alert_type,
+            'first_line_content': first_line_content,
+            'remaining_content': remaining_content
+        }
+
+    def _get_alert_macro_tags(self, alert_type: str) -> tuple:
+        """
+        Get the appropriate Confluence macro tags for the given alert type.
+        
+        Args:
+            alert_type: The GitHub alert type (NOTE, TIP, etc.)
+            
+        Returns:
+            Tuple of (opening_tag, closing_tag) or None if unknown type
+        """
         # Define Confluence macro tags
         info_tag = '<p><ac:structured-macro ac:name="info"><ac:rich-text-body>'
         tip_tag = '<p><ac:structured-macro ac:name="tip"><ac:rich-text-body>'
@@ -218,73 +276,57 @@ class MarkdownConverter:
         note_tag = '<ac:adf-extension><ac:adf-node type=\"panel\"><ac:adf-attribute key=\"panel-type\">note</ac:adf-attribute><ac:adf-content>'
         note_close = '</ac:adf-content></ac:adf-node></ac:adf-extension>'
 
-        # Find all blockquotes that might contain GitHub alerts
-        blockquotes = re.findall(r"<blockquote>(.*?)</blockquote>", html, re.DOTALL)
+        alert_mapping = {
+            "NOTE": (info_tag, close_tag),
+            "TIP": (tip_tag, close_tag),
+            "IMPORTANT": (note_tag, note_close),
+            "WARNING": (warning_tag, close_tag),
+            "CAUTION": (error_tag, close_tag)
+        }
         
-        for quote in blockquotes:
-            # Check for GitHub alert patterns at the start of the blockquote
-            # Use a more specific pattern to avoid ReDoS while handling HTML content
-            if quote.strip().startswith('<p>[!'):
-                # Extract alert type
-                alert_match = re.search(r'<p>\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]', quote, re.IGNORECASE)
-                if alert_match:
-                    alert_type = alert_match.group(1).upper()
-                    
-                    # Find the content after the alert declaration
-                    content_start = alert_match.end()
-                    first_p_end = quote.find('</p>', content_start)
-                    
-                    if first_p_end != -1:
-                        # Extract first line content and remaining content
-                        first_line_content = quote[content_start:first_p_end].strip()
-                        remaining_content = quote[first_p_end + 4:].strip()  # Skip '</p>'
-                        
-                        github_alert_match = True
-                    else:
-                        github_alert_match = False
-                else:
-                    github_alert_match = False
-            else:
-                github_alert_match = False
+        return alert_mapping.get(alert_type)
+
+    def _build_alert_content(self, first_line_content: str, remaining_content: str) -> str:
+        """
+        Build the final content for the alert macro.
+        
+        Args:
+            first_line_content: Content from the first line after alert declaration
+            remaining_content: Any remaining content in the blockquote
             
-            if github_alert_match:
-                # Map GitHub alert types to Confluence macros
-                if alert_type == "NOTE":
-                    macro_tag = info_tag
-                    close_macro_tag = close_tag
-                elif alert_type == "TIP":
-                    macro_tag = tip_tag
-                    close_macro_tag = close_tag
-                elif alert_type == "IMPORTANT":
-                    macro_tag = note_tag  # Using special ADF panel for important
-                    close_macro_tag = note_close
-                elif alert_type == "WARNING":
-                    macro_tag = warning_tag
-                    close_macro_tag = close_tag
-                elif alert_type == "CAUTION":
-                    macro_tag = error_tag
-                    close_macro_tag = close_tag
-                else:
-                    continue  # Skip unknown alert types
-                
-                # Build the content
-                content_parts = []
-                if first_line_content:
-                    content_parts.append(f"<p>{first_line_content}</p>")
-                if remaining_content:
-                    content_parts.append(remaining_content)
-                
-                final_content = "".join(content_parts)
-                if not final_content:
-                    final_content = "<p></p>"
-                
-                # Create the replacement macro
-                replacement = macro_tag + final_content + close_macro_tag
-                
-                # Replace the original blockquote
-                html = html.replace(f"<blockquote>{quote}</blockquote>", replacement)
+        Returns:
+            Formatted content string
+        """
+        content_parts = []
+        if first_line_content:
+            content_parts.append(f"<p>{first_line_content}</p>")
+        if remaining_content:
+            content_parts.append(remaining_content)
         
-        return html
+        final_content = "".join(content_parts)
+        return final_content if final_content else "<p></p>"
+
+    def _create_alert_macro(self, alert_info: dict) -> str:
+        """
+        Create a Confluence macro from parsed GitHub alert information.
+        
+        Args:
+            alert_info: Dictionary containing alert type and content
+            
+        Returns:
+            Confluence macro string
+        """
+        macro_tags = self._get_alert_macro_tags(alert_info['alert_type'])
+        if not macro_tags:
+            return None  # Unknown alert type
+            
+        macro_tag, close_macro_tag = macro_tags
+        final_content = self._build_alert_content(
+            alert_info['first_line_content'], 
+            alert_info['remaining_content']
+        )
+        
+        return macro_tag + final_content + close_macro_tag
 
     def convert_info_macros(self, html: str) -> str:
         """

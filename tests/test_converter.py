@@ -762,6 +762,131 @@ def test_convert_github_alerts_malformed_html_resistance():
             pytest.fail(f"convert_github_alerts raised {type(e).__name__}: {e} for input: {malformed_html}")
 
 
+def test_parse_github_alert_valid_cases():
+    """Test the _parse_github_alert method with valid inputs"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    # Test valid NOTE alert
+    quote = '<p>[!NOTE] This is a note content</p><p>Additional content</p>'
+    result = converter._parse_github_alert(quote)
+    
+    assert result is not None
+    assert result['alert_type'] == 'NOTE'
+    assert result['first_line_content'] == 'This is a note content'
+    assert result['remaining_content'] == '<p>Additional content</p>'
+
+
+def test_parse_github_alert_case_insensitive():
+    """Test that _parse_github_alert handles case insensitive alert types"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    quote = '<p>[!tip] This is a tip in lowercase</p>'
+    result = converter._parse_github_alert(quote)
+    
+    assert result is not None
+    assert result['alert_type'] == 'TIP'
+    assert result['first_line_content'] == 'This is a tip in lowercase'
+
+
+def test_parse_github_alert_invalid_cases():
+    """Test the _parse_github_alert method with invalid inputs"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    invalid_cases = [
+        '<p>Regular blockquote content</p>',  # No alert syntax
+        '<p>[!INVALID] Unknown alert type</p>',  # Unknown alert type
+        '<p>[!NOTE] Content without closing p',  # Malformed HTML
+        '',  # Empty string
+        '<p>[NOTE] Missing exclamation</p>',  # Missing !
+    ]
+    
+    for invalid_quote in invalid_cases:
+        result = converter._parse_github_alert(invalid_quote)
+        assert result is None, f"Expected None for input: {invalid_quote}"
+
+
+def test_get_alert_macro_tags():
+    """Test the _get_alert_macro_tags method"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    # Test valid alert types
+    note_tags = converter._get_alert_macro_tags("NOTE")
+    assert note_tags is not None
+    assert 'ac:name="info"' in note_tags[0]
+    
+    tip_tags = converter._get_alert_macro_tags("TIP")
+    assert tip_tags is not None
+    assert 'ac:name="tip"' in tip_tags[0]
+    
+    important_tags = converter._get_alert_macro_tags("IMPORTANT")
+    assert important_tags is not None
+    assert 'ac:adf-extension' in important_tags[0]
+    assert 'panel-type' in important_tags[0]
+    
+    warning_tags = converter._get_alert_macro_tags("WARNING")
+    assert warning_tags is not None
+    assert 'ac:name="note"' in warning_tags[0]
+    
+    caution_tags = converter._get_alert_macro_tags("CAUTION")
+    assert caution_tags is not None
+    assert 'ac:name="warning"' in caution_tags[0]
+    
+    # Test invalid alert type
+    invalid_tags = converter._get_alert_macro_tags("INVALID")
+    assert invalid_tags is None
+
+
+def test_build_alert_content():
+    """Test the _build_alert_content method"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    # Test with both first line and remaining content
+    result = converter._build_alert_content("First line", "<p>Second paragraph</p>")
+    assert result == "<p>First line</p><p>Second paragraph</p>"
+    
+    # Test with only first line content
+    result = converter._build_alert_content("Only first line", "")
+    assert result == "<p>Only first line</p>"
+    
+    # Test with only remaining content
+    result = converter._build_alert_content("", "<p>Only remaining</p>")
+    assert result == "<p>Only remaining</p>"
+    
+    # Test with no content
+    result = converter._build_alert_content("", "")
+    assert result == "<p></p>"
+
+
+def test_create_alert_macro():
+    """Test the _create_alert_macro method"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    # Test valid alert info
+    alert_info = {
+        'alert_type': 'NOTE',
+        'first_line_content': 'Test content',
+        'remaining_content': ''
+    }
+    
+    result = converter._create_alert_macro(alert_info)
+    assert result is not None
+    assert 'ac:name="info"' in result
+    assert 'Test content' in result
+    assert '</ac:structured-macro>' in result
+    
+    # Test IMPORTANT alert (special ADF format)
+    alert_info['alert_type'] = 'IMPORTANT'
+    result = converter._create_alert_macro(alert_info)
+    assert result is not None
+    assert 'ac:adf-extension' in result
+    assert 'panel-type' in result
+    
+    # Test invalid alert type
+    alert_info['alert_type'] = 'INVALID'
+    result = converter._create_alert_macro(alert_info)
+    assert result is None
+
+
 def test_process_refs_basic_footnote():
     """Test basic footnote processing with single footnote"""
     converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
