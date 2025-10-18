@@ -6,6 +6,7 @@ This document describes the standard and special markdown syntax supported by th
 
 - [Standard Markdown Support](#standard-markdown-support)
 - [Special Confluence Features](#special-confluence-features)
+- [GitHub-Flavored Markdown Alerts](#github-flavored-markdown-alerts)
 - [Custom Panel Syntax](#custom-panel-syntax)
 - [Table of Contents Generation](#table-of-contents-generation)
 - [Code Blocks](#code-blocks)
@@ -124,6 +125,85 @@ The converter automatically detects special blockquote patterns and converts the
 ```
 
 **Note:** The type detection is case-insensitive and supports various formats like "Warning:", "Warning :", etc.
+
+## GitHub-Flavored Markdown Alerts
+
+The converter supports GitHub-flavored markdown alert syntax, which takes precedence over traditional blockquote processing. These alerts provide a standardized way to create different types of callout panels.
+
+### Supported Alert Types
+
+#### NOTE Alert
+```markdown
+> [!NOTE]
+> Useful information that users should know, even when skimming content.
+```
+
+Converts to a Confluence info panel (blue icon).
+
+#### TIP Alert
+```markdown
+> [!TIP]
+> Helpful advice for doing things better or more easily.
+```
+
+Converts to a Confluence tip panel (green icon).
+
+#### IMPORTANT Alert
+```markdown
+> [!IMPORTANT]
+> Key information users need to know to achieve their goal.
+```
+
+Converts to a special Confluence ADF panel with note styling.
+
+#### WARNING Alert
+```markdown
+> [!WARNING]
+> Urgent info that needs immediate user attention to avoid problems.
+```
+
+Converts to a Confluence note panel (yellow caution icon).
+
+#### CAUTION Alert
+```markdown
+> [!CAUTION]
+> Advises about risks or negative outcomes of certain actions.
+```
+
+Converts to a Confluence warning panel (red cross icon).
+
+### Features
+
+- **Case Insensitive**: Works with `[!note]`, `[!NOTE]`, `[!Note]`, etc.
+- **Multi-line Support**: Supports multiple paragraphs within alerts
+- **HTML Formatting**: Preserves bold, italic, and other formatting inside alerts
+- **Precedence**: GitHub alerts are processed before traditional blockquote patterns
+- **Single Line**: Content can be on the same line as the alert type
+
+### Examples
+
+#### Single Line Alert
+```markdown
+> [!WARNING] This is a single-line warning message.
+```
+
+#### Multi-line Alert
+```markdown
+> [!IMPORTANT]
+> This is the first paragraph of an important message.
+>
+> This is a second paragraph with **bold** and *italic* formatting.
+```
+
+#### Mixed Content
+```markdown
+> [!TIP]
+> Here's a helpful tip with a code example:
+>
+> ```bash
+> npm install package-name
+> ```
+```
 
 ## Custom Panel Syntax
 

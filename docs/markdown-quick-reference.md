@@ -4,6 +4,15 @@ Quick reference for special markdown syntax supported by md_to_conf converter.
 
 ## Status Panels
 
+### GitHub-Flavored Markdown Alerts (Recommended)
+```markdown
+> [!NOTE]      # Info panel (blue icon)
+> [!TIP]       # Tip panel (green icon)
+> [!IMPORTANT] # Important panel (special ADF format)
+> [!WARNING]   # Warning panel (yellow caution icon)
+> [!CAUTION]   # Error panel (red cross icon)
+```
+
 ### Blockquote Style
 ```markdown
 > This is general info (blue icon)

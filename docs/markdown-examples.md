@@ -52,6 +52,28 @@ Don't forget `inline code` formatting.
 
 ## Special Confluence Features
 
+### GitHub-Flavored Markdown Alerts (Recommended)
+
+#### Note Alert (Info Panel)
+> [!NOTE]
+> This is a note alert that will appear in a blue info panel.
+
+#### Tip Alert (Tip Panel)
+> [!TIP]
+> This is a tip alert that will appear in a green tip panel.
+
+#### Important Alert (Special ADF Panel)
+> [!IMPORTANT]
+> This is an important alert that will appear in a special ADF note panel format for better visibility.
+
+#### Warning Alert (Warning Panel)
+> [!WARNING]
+> This is a warning alert that will appear in a yellow warning panel.
+
+#### Caution Alert (Error Panel)
+> [!CAUTION]
+> This is a caution alert that will appear in a red error panel.
+
 ### Status Panels via Blockquotes
 
 #### Info Panel (Default)

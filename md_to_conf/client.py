@@ -371,15 +371,22 @@ class ConfluenceApiClient:
         self.get_space_id()
 
         LOGGER.debug("\tRetrieving folder information: %s", folder_name)
-        url = "%s/api/v2/pages/%d/descendants?depth=5" % (self.confluence_api_url, self.space_home_page_id)
-        
+        url = "%s/api/v2/pages/%d/descendants?depth=5" % (
+            self.confluence_api_url,
+            self.space_home_page_id,
+        )
+
         folder_id = 0
 
-        while True: 
+        while True:
             LOGGER.debug("Requesting URL for Folder: %s", url)
-            response = self.check_errors_and_get_json(self.get_session(retry=True).get(url))
+            response = self.check_errors_and_get_json(
+                self.get_session(retry=True).get(url)
+            )
             if response.status_code == 404:
-                self.log_not_found("Folder", {"Space Home Page Id": "%d" % self.space_home_page_id})
+                self.log_not_found(
+                    "Folder", {"Space Home Page Id": "%d" % self.space_home_page_id}
+                )
                 break  # Exit the loop on 404
 
             for item in response.data["results"]:
@@ -396,7 +403,6 @@ class ConfluenceApiClient:
             if base:
                 base = base.replace("/wiki", "")
                 url = urllib.parse.urljoin(base, url)
-
 
         return folder_id
 
