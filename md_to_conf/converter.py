@@ -182,10 +182,10 @@ class MarkdownConverter:
         """
         regrex_pattern = re.compile(
             pattern="["
-            "\U0001F600-\U0001F64F"  # emoticons
-            "\U0001F300-\U0001F5FF"  # symbols & pictographs
-            "\U0001F680-\U0001F6FF"  # transport & map symbols
-            "\U0001F1E0-\U0001F1FF"  # flags (iOS)
+            "\U0001f600-\U0001f64f"  # emoticons
+            "\U0001f300-\U0001f5ff"  # symbols & pictographs
+            "\U0001f680-\U0001f6ff"  # transport & map symbols
+            "\U0001f1e0-\U0001f1ff"  # flags (iOS)
             "]+",
             flags=re.UNICODE,
         )
@@ -194,10 +194,10 @@ class MarkdownConverter:
     def convert_github_alerts(self, html: str) -> str:
         """
         Convert GitHub-flavored markdown alert boxes to Confluence macros
-        
+
         Supports GitHub alert syntax:
         > [!NOTE] Content
-        > [!TIP] Content  
+        > [!TIP] Content
         > [!IMPORTANT] Content
         > [!WARNING] Content
         > [!CAUTION] Content
@@ -209,59 +209,64 @@ class MarkdownConverter:
         """
         # Find all blockquotes that might contain GitHub alerts
         blockquotes = re.findall(r"<blockquote>(.*?)</blockquote>", html, re.DOTALL)
-        
+
         for quote in blockquotes:
             parsed_alert = self._parse_github_alert(quote)
             if parsed_alert:
                 replacement_macro = self._create_alert_macro(parsed_alert)
-                html = html.replace(f"<blockquote>{quote}</blockquote>", replacement_macro)
-        
+                if replacement_macro:
+                    html = html.replace(
+                        f"<blockquote>{quote}</blockquote>", replacement_macro
+                    )
+
         return html
 
-    def _parse_github_alert(self, quote: str) -> dict:
+    def _parse_github_alert(self, quote: str) -> typing.Optional[dict]:
         """
         Parse a blockquote to extract GitHub alert information.
-        
+
         Args:
             quote: The blockquote content
-            
+
         Returns:
             Dictionary with alert info if valid GitHub alert, None otherwise
         """
-        if not quote.strip().startswith('<p>[!'):
+        if not quote.strip().startswith("<p>[!"):
             return None
-            
+
         # Extract alert type
-        alert_match = re.search(r'<p>\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]', quote, re.IGNORECASE)
+        alert_match = re.search(
+            r"<p>\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]", quote, re.IGNORECASE
+        )
         if not alert_match:
             return None
-            
+
         alert_type = alert_match.group(1).upper()
-        
+
         # Find the content after the alert declaration
         content_start = alert_match.end()
-        first_p_end = quote.find('</p>', content_start)
-        
+        first_p_end = quote.find("</p>", content_start)
+
         if first_p_end == -1:
             return None
-            
+
         # Extract first line content and remaining content
         first_line_content = quote[content_start:first_p_end].strip()
-        remaining_content = quote[first_p_end + 4:].strip()  # Skip '</p>'
-        
+        remaining_content = quote[first_p_end + 4 :].strip()  # Skip '</p>'
+
         return {
-            'alert_type': alert_type,
-            'first_line_content': first_line_content,
-            'remaining_content': remaining_content
+            "alert_type": alert_type,
+            "first_line_content": first_line_content,
+            "remaining_content": remaining_content,
         }
 
-    def _get_alert_macro_tags(self, alert_type: str) -> tuple:
+    def _get_alert_macro_tags(self, alert_type: str) -> typing.Optional[tuple]:
         """
         Get the appropriate Confluence macro tags for the given alert type.
-        
+
         Args:
             alert_type: The GitHub alert type (NOTE, TIP, etc.)
-            
+
         Returns:
             Tuple of (opening_tag, closing_tag) or None if unknown type
         """
@@ -273,27 +278,29 @@ class MarkdownConverter:
         close_tag = "</ac:rich-text-body></ac:structured-macro></p>"
 
         # Special note tag for IMPORTANT alerts (using ADF panel format)
-        note_tag = '<ac:adf-extension><ac:adf-node type=\"panel\"><ac:adf-attribute key=\"panel-type\">note</ac:adf-attribute><ac:adf-content>'
-        note_close = '</ac:adf-content></ac:adf-node></ac:adf-extension>'
+        note_tag = '<ac:adf-extension><ac:adf-node type="panel"><ac:adf-attribute key="panel-type">note</ac:adf-attribute><ac:adf-content>'
+        note_close = "</ac:adf-content></ac:adf-node></ac:adf-extension>"
 
         alert_mapping = {
             "NOTE": (info_tag, close_tag),
             "TIP": (tip_tag, close_tag),
             "IMPORTANT": (note_tag, note_close),
             "WARNING": (warning_tag, close_tag),
-            "CAUTION": (error_tag, close_tag)
+            "CAUTION": (error_tag, close_tag),
         }
-        
+
         return alert_mapping.get(alert_type)
 
-    def _build_alert_content(self, first_line_content: str, remaining_content: str) -> str:
+    def _build_alert_content(
+        self, first_line_content: str, remaining_content: str
+    ) -> str:
         """
         Build the final content for the alert macro.
-        
+
         Args:
             first_line_content: Content from the first line after alert declaration
             remaining_content: Any remaining content in the blockquote
-            
+
         Returns:
             Formatted content string
         """
@@ -302,30 +309,29 @@ class MarkdownConverter:
             content_parts.append(f"<p>{first_line_content}</p>")
         if remaining_content:
             content_parts.append(remaining_content)
-        
+
         final_content = "".join(content_parts)
         return final_content if final_content else "<p></p>"
 
-    def _create_alert_macro(self, alert_info: dict) -> str:
+    def _create_alert_macro(self, alert_info: dict) -> typing.Optional[str]:
         """
         Create a Confluence macro from parsed GitHub alert information.
-        
+
         Args:
             alert_info: Dictionary containing alert type and content
-            
+
         Returns:
-            Confluence macro string
+            Confluence macro string or None if unknown alert type
         """
-        macro_tags = self._get_alert_macro_tags(alert_info['alert_type'])
+        macro_tags = self._get_alert_macro_tags(alert_info["alert_type"])
         if not macro_tags:
             return None  # Unknown alert type
-            
+
         macro_tag, close_macro_tag = macro_tags
         final_content = self._build_alert_content(
-            alert_info['first_line_content'], 
-            alert_info['remaining_content']
+            alert_info["first_line_content"], alert_info["remaining_content"]
         )
-        
+
         return macro_tag + final_content + close_macro_tag
 
     def convert_info_macros(self, html: str) -> str:
@@ -349,9 +355,8 @@ class MarkdownConverter:
         error_tag = info_tag.replace("info", "warning")
         close_tag = "</p></ac:rich-text-body></ac:structured-macro></p>"
 
-        note_tag = '<ac:adf-extension><ac:adf-node type=\"panel\"><ac:adf-attribute key=\"panel-type\">note</ac:adf-attribute><ac:adf-content><p>'
-        note_close = '</p></ac:adf-content></ac:adf-node></ac:adf-extension>'
-
+        note_tag = '<ac:adf-extension><ac:adf-node type="panel"><ac:adf-attribute key="panel-type">note</ac:adf-attribute><ac:adf-content><p>'
+        note_close = "</p></ac:adf-content></ac:adf-node></ac:adf-extension>"
 
         # Custom tags converted into macros
         html = html.replace("<p>~?", info_tag).replace("?~</p>", close_tag)
@@ -397,7 +402,7 @@ class MarkdownConverter:
                         clean_tag.replace("<p>", error_tag)
                         .replace("</p>", close_tag)
                         .strip()
-                    )    
+                    )
                 else:
                     macro_tag = (
                         quote.replace("<p>", info_tag)

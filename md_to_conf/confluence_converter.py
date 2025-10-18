@@ -304,7 +304,7 @@ class ConfluenceConverter:
                 parent_folder = self.confluence_client.get_folder(self.ancestor)
                 if parent_folder > 0:
                     parent_page_id = parent_folder
-                    
+
         if parent_page_id == 0:
             LOGGER.error("Error: Parent page/folder does not exist: %s", self.ancestor)
 
