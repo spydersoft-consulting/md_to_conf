@@ -241,7 +241,7 @@ class ConfluenceApiClient:
             parent_id: confluence parentId
 
         Returns:
-            PageInfo: A num
+            PageInfo: A named tuple with page information
         """
         LOGGER.info("Creating page...")
 
@@ -473,15 +473,17 @@ class ConfluenceApiClient:
         url = "%s/api/v2/pages/%d/attachments?filename=%s" % (
             self.confluence_api_url,
             page_id,
-            filename,
+            urllib.parse.quote_plus(filename),
         )
 
-        response = self.get_session().get(url)
-        response.raise_for_status()
-        data = response.json()
+        response = self.check_errors_and_get_json(self.get_session().get(url))
+        
+        if response.status_code == 404:
+            self.log_not_found("Attachment", {"Page Id": "%d" % page_id, "Filename": filename})
+            return ""
 
-        if len(data["results"]) >= 1:
-            att_id = data["results"][0]["id"]
+        if len(response.data["results"]) >= 1:
+            att_id = response.data["results"][0]["id"]
             return att_id
 
         return ""
@@ -514,13 +516,15 @@ class ConfluenceApiClient:
 
         attachment_id = self.get_attachment(page_id, filename)
         if attachment_id != "":
-            url = "%s/rest/api/content/%d/child/attachment/%s/data" % (
+            # Update existing attachment using v2 API
+            url = "%s/api/v2/pages/%d/attachments/%s" % (
                 self.confluence_api_url,
                 page_id,
                 attachment_id,
             )
         else:
-            url = "%s/rest/api/content/%d/child/attachment/" % (
+            # Create new attachment using v2 API
+            url = "%s/api/v2/pages/%d/attachments" % (
                 self.confluence_api_url,
                 page_id,
             )
@@ -540,12 +544,13 @@ class ConfluenceApiClient:
         Get label information for the given label name
 
         Args:
-            label_name: pageId
+            label_name: label name to search for
         Returns:
             LabelInfo.  If not found, labelInfo will be 0
         """
 
         LOGGER.debug("\tRetrieving label information: %s", label_name)
+        # Note: Keep using v1 API for labels as v2 API doesn't have equivalent endpoints
         url = "%s/rest/api/label?name=%s" % (
             self.confluence_api_url,
             urllib.parse.quote_plus(label_name),
@@ -584,6 +589,7 @@ class ConfluenceApiClient:
 
         add_label_json = {"prefix": prefix, "name": label_name}
 
+        # Note: Keep using v1 API for labels as v2 API doesn't have equivalent endpoints
         url = "%s/rest/api/content/%d/label" % (self.confluence_api_url, page_id)
 
         response = self.get_session().post(url, data=json.dumps(add_label_json))
