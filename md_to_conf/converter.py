@@ -116,7 +116,7 @@ class MarkdownConverter:
         html = str.replace(
             html,
             r"<p>[TOC]</p>",
-            '<p><ac:structured-macro ac:name="toc" ac:schema-version="1"/></p>',
+            '<p><ac:structured-macro ac:name="toc-zone" ac:schema-version="1" data-layout="default"><ac:rich-text-body><ac:structured-macro ac:name="toc" ac:schema-version="1" data-layout="default"/></ac:rich-text-body></ac:structured-macro></p>',
         )
 
         return html
@@ -191,6 +191,83 @@ class MarkdownConverter:
         )
         return regrex_pattern.sub(r"", html)
 
+    def convert_github_alerts(self, html: str) -> str:
+        """
+        Convert GitHub-flavored markdown alert boxes to Confluence macros
+        
+        Supports GitHub alert syntax:
+        > [!NOTE] Content
+        > [!TIP] Content  
+        > [!IMPORTANT] Content
+        > [!WARNING] Content
+        > [!CAUTION] Content
+
+        Args:
+            html: html string
+        Returns:
+            modified html string with GitHub alerts converted to Confluence macros
+        """
+        # Define Confluence macro tags
+        info_tag = '<p><ac:structured-macro ac:name="info"><ac:rich-text-body>'
+        tip_tag = '<p><ac:structured-macro ac:name="tip"><ac:rich-text-body>'
+        warning_tag = '<p><ac:structured-macro ac:name="note"><ac:rich-text-body>'
+        error_tag = '<p><ac:structured-macro ac:name="warning"><ac:rich-text-body>'
+        close_tag = "</ac:rich-text-body></ac:structured-macro></p>"
+
+        # Special note tag for IMPORTANT alerts (using ADF panel format)
+        note_tag = '<ac:adf-extension><ac:adf-node type=\"panel\"><ac:adf-attribute key=\"panel-type\">note</ac:adf-attribute><ac:adf-content>'
+        note_close = '</ac:adf-content></ac:adf-node></ac:adf-extension>'
+
+        # Find all blockquotes that might contain GitHub alerts
+        blockquotes = re.findall(r"<blockquote>(.*?)</blockquote>", html, re.DOTALL)
+        
+        for quote in blockquotes:
+            # Check for GitHub alert patterns at the start of the blockquote
+            github_alert_match = re.search(r"<p>\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(.*?)</p>(.*)", quote, re.IGNORECASE | re.DOTALL)
+            
+            if github_alert_match:
+                alert_type = github_alert_match.group(1).upper()
+                first_line_content = github_alert_match.group(2).strip()
+                remaining_content = github_alert_match.group(3).strip()
+                
+                # Map GitHub alert types to Confluence macros
+                if alert_type == "NOTE":
+                    macro_tag = info_tag
+                    close_macro_tag = close_tag
+                elif alert_type == "TIP":
+                    macro_tag = tip_tag
+                    close_macro_tag = close_tag
+                elif alert_type == "IMPORTANT":
+                    macro_tag = note_tag  # Using special ADF panel for important
+                    close_macro_tag = note_close
+                elif alert_type == "WARNING":
+                    macro_tag = warning_tag
+                    close_macro_tag = close_tag
+                elif alert_type == "CAUTION":
+                    macro_tag = error_tag
+                    close_macro_tag = close_tag
+                else:
+                    continue  # Skip unknown alert types
+                
+                # Build the content
+                content_parts = []
+                if first_line_content:
+                    content_parts.append(f"<p>{first_line_content}</p>")
+                if remaining_content:
+                    content_parts.append(remaining_content)
+                
+                final_content = "".join(content_parts)
+                if not final_content:
+                    final_content = "<p></p>"
+                
+                # Create the replacement macro
+                replacement = macro_tag + final_content + close_macro_tag
+                
+                # Replace the original blockquote
+                html = html.replace(f"<blockquote>{quote}</blockquote>", replacement)
+        
+        return html
+
     def convert_info_macros(self, html: str) -> str:
         """
         Converts html for info, note or warning macros
@@ -200,6 +277,9 @@ class MarkdownConverter:
         Returns:
             modified html string
         """
+        # First, convert GitHub-flavored markdown alerts (takes precedence)
+        html = self.convert_github_alerts(html)
+
         info_tag = '<p><ac:structured-macro ac:name="info"><ac:rich-text-body><p>'
         ## Warning (Yellow Caution Icon) is named 'note' in Confluence
         warning_tag = info_tag.replace("info", "note")

@@ -1,4 +1,6 @@
-# Advanced Page
+# Advanced Page with Table of Contents
+
+[TOC]
 
 [Link to Heading](#heading-3-2)
 
@@ -38,7 +40,6 @@ Some test for heading 3-2
 
 Text above Info
 
-> [!NOTE]
 > This is an info.
 
 Text above warning
@@ -56,3 +57,23 @@ Text above error
 Text above Note
 
 > Note: This is a note.
+
+### Custom Panel Syntax
+
+~?This is an info.?~
+
+~%This is a warning.%~
+
+~^This is a success.^~
+
+~$This is an error.$~
+
+~!This is a note.!~
+
+```
+This is a code block with on language assigned
+```
+
+```javascript
+var block = has_javascript_lang();
+```

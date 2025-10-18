@@ -14,6 +14,14 @@ def test_converter_basic() -> MarkdownConverter:
 def test_converter_advanced() -> MarkdownConverter:
     return MarkdownConverter("tests/testfiles/advanced.md", URL, "default", 2)
 
+@pytest.fixture
+def test_converter_advanced() -> MarkdownConverter:
+    return MarkdownConverter("tests/testfiles/github-alerts.md", URL, "default", 2)
+
+@pytest.fixture
+def test_converter_advanced() -> MarkdownConverter:
+    return MarkdownConverter("tests/testfiles/github-alerts.md", URL, "default", 2)
+
 
 def test_converter_init():
     md_file = "tests/testfiles/basic.md"
@@ -526,3 +534,184 @@ def test_process_headers_complex_html_structure_v2():
     }
     
     assert result == expected
+
+
+def test_convert_github_alerts_note():
+    """Test conversion of GitHub NOTE alert to Confluence info macro"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '<blockquote><p>[!NOTE] This is a note alert with important information.</p></blockquote>'
+    
+    result = converter.convert_github_alerts(html)
+    
+    expected = '<p><ac:structured-macro ac:name="info"><ac:rich-text-body><p>This is a note alert with important information.</p></ac:rich-text-body></ac:structured-macro></p>'
+    
+    assert result == expected
+
+
+def test_convert_github_alerts_tip():
+    """Test conversion of GitHub TIP alert to Confluence tip macro"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '<blockquote><p>[!TIP] Here is a helpful tip for users.</p></blockquote>'
+    
+    result = converter.convert_github_alerts(html)
+    
+    expected = '<p><ac:structured-macro ac:name="tip"><ac:rich-text-body><p>Here is a helpful tip for users.</p></ac:rich-text-body></ac:structured-macro></p>'
+    
+    assert result == expected
+
+
+def test_convert_github_alerts_important():
+    """Test conversion of GitHub IMPORTANT alert to Confluence ADF panel"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '<blockquote><p>[!IMPORTANT] This is critical information users must know.</p></blockquote>'
+    
+    result = converter.convert_github_alerts(html)
+    
+    expected = '<ac:adf-extension><ac:adf-node type=\"panel\"><ac:adf-attribute key=\"panel-type\">note</ac:adf-attribute><ac:adf-content><p>This is critical information users must know.</p></ac:adf-content></ac:adf-node></ac:adf-extension>'
+    
+    assert result == expected
+
+
+def test_convert_github_alerts_warning():
+    """Test conversion of GitHub WARNING alert to Confluence note macro"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '<blockquote><p>[!WARNING] This is a warning about potential issues.</p></blockquote>'
+    
+    result = converter.convert_github_alerts(html)
+    
+    expected = '<p><ac:structured-macro ac:name="note"><ac:rich-text-body><p>This is a warning about potential issues.</p></ac:rich-text-body></ac:structured-macro></p>'
+    
+    assert result == expected
+
+
+def test_convert_github_alerts_caution():
+    """Test conversion of GitHub CAUTION alert to Confluence warning macro"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '<blockquote><p>[!CAUTION] Be very careful when performing this action.</p></blockquote>'
+    
+    result = converter.convert_github_alerts(html)
+    
+    expected = '<p><ac:structured-macro ac:name="warning"><ac:rich-text-body><p>Be very careful when performing this action.</p></ac:rich-text-body></ac:structured-macro></p>'
+    
+    assert result == expected
+
+
+def test_convert_github_alerts_case_insensitive():
+    """Test that GitHub alerts work with different cases"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '<blockquote><p>[!note] This should work with lowercase.</p></blockquote>'
+    
+    result = converter.convert_github_alerts(html)
+    
+    expected = '<p><ac:structured-macro ac:name="info"><ac:rich-text-body><p>This should work with lowercase.</p></ac:rich-text-body></ac:structured-macro></p>'
+    
+    assert result == expected
+
+
+def test_convert_github_alerts_multiline():
+    """Test GitHub alerts with multiline content"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '<blockquote><p>[!NOTE] This is a note with multiple lines</p><p>Second paragraph of the note</p></blockquote>'
+    
+    result = converter.convert_github_alerts(html)
+    
+    expected = '<p><ac:structured-macro ac:name="info"><ac:rich-text-body><p>This is a note with multiple lines</p><p>Second paragraph of the note</p></ac:rich-text-body></ac:structured-macro></p>'
+    
+    assert result == expected
+
+
+def test_convert_github_alerts_with_formatting():
+    """Test GitHub alerts with HTML formatting inside"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '<blockquote><p>[!TIP] This tip has <strong>bold</strong> and <em>italic</em> text.</p></blockquote>'
+    
+    result = converter.convert_github_alerts(html)
+    
+    expected = '<p><ac:structured-macro ac:name="tip"><ac:rich-text-body><p>This tip has <strong>bold</strong> and <em>italic</em> text.</p></ac:rich-text-body></ac:structured-macro></p>'
+    
+    assert result == expected
+
+
+def test_convert_github_alerts_no_alert():
+    """Test that regular blockquotes are not affected by GitHub alert conversion"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '<blockquote><p>This is just a regular blockquote without any alert syntax.</p></blockquote>'
+    
+    result = converter.convert_github_alerts(html)
+    
+    # Should remain unchanged
+    assert result == html
+
+
+def test_convert_github_alerts_unknown_type():
+    """Test that unknown alert types are ignored"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '<blockquote><p>[!UNKNOWN] This alert type does not exist.</p></blockquote>'
+    
+    result = converter.convert_github_alerts(html)
+    
+    # Should remain unchanged
+    assert result == html
+
+
+def test_convert_info_macros_github_precedence():
+    """Test that GitHub alerts take precedence over other blockquote conversions"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    # Test input with both GitHub alert and traditional format
+    html = '<blockquote><p>[!NOTE] GitHub alert</p></blockquote><blockquote><p>Note: Traditional note</p></blockquote>'
+    
+    result = converter.convert_info_macros(html)
+    
+    # GitHub alert should be converted, traditional should be handled by existing logic
+    assert '<ac:structured-macro ac:name="info">' in result
+    assert 'GitHub alert' in result
+
+
+def test_convert_github_alerts_empty_content():
+    """Test GitHub alerts with minimal content"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    html = '<blockquote><p>[!NOTE]</p></blockquote>'
+    
+    result = converter.convert_github_alerts(html)
+    
+    expected = '<p><ac:structured-macro ac:name="info"><ac:rich-text-body><p></p></ac:rich-text-body></ac:structured-macro></p>'
+    
+    assert result == expected
+
+
+def test_github_alerts_integration_example():
+    """Integration test showing GitHub alerts in action"""
+    converter = MarkdownConverter("dummy.md", "https://example.com/wiki", "default", 2)
+    
+    # Example markdown converted to HTML that might come from the markdown parser
+    html = '''<h1>Documentation Example</h1>
+<blockquote><p>[!NOTE] This feature requires Python 3.8 or later.</p></blockquote>
+<blockquote><p>[!TIP] Use virtual environments for better dependency management.</p></blockquote>
+<blockquote><p>[!WARNING] Make sure to backup your data before proceeding.</p></blockquote>
+<blockquote><p>[!CAUTION] This operation cannot be undone.</p></blockquote>'''
+    
+    result = converter.convert_info_macros(html)
+    
+    # Verify all alert types are converted
+    assert 'ac:structured-macro ac:name="info"' in result  # NOTE
+    assert 'ac:structured-macro ac:name="tip"' in result   # TIP
+    assert 'ac:structured-macro ac:name="note"' in result  # WARNING
+    assert 'ac:structured-macro ac:name="warning"' in result  # CAUTION
+    
+    # Verify the content is preserved
+    assert 'Python 3.8 or later' in result
+    assert 'virtual environments' in result
+    assert 'backup your data' in result
+    assert 'cannot be undone' in result
