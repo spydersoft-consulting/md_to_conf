@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Updated attachment handling to use Confluence REST API v2 endpoints consistently
+- Improved error handling in get_attachment method with proper 404 response handling
+- Enhanced attachment filename URL encoding for better compatibility
+- Updated API client documentation and parameter descriptions
+
+### Added
+
+- Comprehensive test coverage for converter.py edge cases (code blocks without language, generic blockquotes)
+- Additional test coverage for client.py error scenarios (delete page failures, attachment not found cases)
+- Improved test infrastructure using proper mocking patterns with check_errors_and_get_json
+
+### Fixed
+
+- Attachment upload/download endpoints now properly use v2 API paths
+- Better error logging and diagnostics for attachment operations
+
 ## [1.1.0] - 2025-10-18
 
 ### Added
