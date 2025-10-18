@@ -23,4 +23,4 @@ Please see the [Contribute](https://spydersoft-consulting.github.io/md_to_conf/c
 
 ## Change Log
 
-[Change Log](https://spydersoft-consulting.github.io/md_to_conf/changes/)
+[Change Log](https://spydersoft-consulting.github.io/md_to_conf/CHANGELOG/)
