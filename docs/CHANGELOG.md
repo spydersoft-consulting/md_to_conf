@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+### Added
+
+### Fixed
+
+## [1.1.1] - 2025-10-18
+
+### Changed
+
 - Updated attachment handling to use Confluence REST API v2 endpoints consistently
 - Improved error handling in get_attachment method with proper 404 response handling
 - Enhanced attachment filename URL encoding for better compatibility
