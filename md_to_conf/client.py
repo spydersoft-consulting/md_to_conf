@@ -523,14 +523,14 @@ class ConfluenceApiClient:
         attachment_id = self.get_attachment(page_id, filename)
         if attachment_id != "":
             # Update existing attachment using v2 API
-            url = "%s/api/v2/pages/%d/attachments/%s" % (
+            url = "%s/rest/api/content/%d/child/attachment/%s/data" % (
                 self.confluence_api_url,
                 page_id,
                 attachment_id,
             )
         else:
             # Create new attachment using v2 API
-            url = "%s/api/v2/pages/%d/attachments" % (
+            url = "%s/rest/api/content/%d/child/attachment/" % (
                 self.confluence_api_url,
                 page_id,
             )
