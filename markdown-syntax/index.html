@@ -1,0 +1,2475 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://spydersoft-consulting.github.io/md_to_conf/markdown-syntax/">
+      
+      
+        <link rel="prev" href="../markdown-quick-reference/">
+      
+      
+        <link rel="next" href="../markdown-examples/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.17">
+    
+    
+      
+        <title>Syntax - Markdown to Confluence</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.bcfcd587.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#markdown-syntax-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Markdown to Confluence" class="md-header__button md-logo" aria-label="Markdown to Confluence" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Markdown to Confluence
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Syntax
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Markdown to Confluence" class="md-nav__button md-logo" aria-label="Markdown to Confluence" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Markdown to Confluence
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Markdown
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Markdown
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../markdown-quick-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Syntax
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Syntax
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table of Contents
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#standard-markdown-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Standard Markdown Support
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Standard Markdown Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#headers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Headers
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#text-formatting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Text Formatting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lists" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lists
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Lists">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unordered-lists" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unordered Lists
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ordered-lists" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ordered Lists
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#links" class="md-nav__link">
+    <span class="md-ellipsis">
+      Links
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#blockquotes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Blockquotes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#special-confluence-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Special Confluence Features
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Special Confluence Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enhanced-blockquotes-with-status-panels" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enhanced Blockquotes with Status Panels
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Enhanced Blockquotes with Status Panels">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#info-panel-blue-icon" class="md-nav__link">
+    <span class="md-ellipsis">
+      Info Panel (Blue Icon)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warning-panel-yellow-caution-icon" class="md-nav__link">
+    <span class="md-ellipsis">
+      Warning Panel (Yellow Caution Icon)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#success-panel-green-check-icon" class="md-nav__link">
+    <span class="md-ellipsis">
+      Success Panel (Green Check Icon)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-panel-red-cross-icon" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Panel (Red Cross Icon)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#note-panel-special-adf-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      Note Panel (Special ADF Format)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#github-flavored-markdown-alerts" class="md-nav__link">
+    <span class="md-ellipsis">
+      GitHub-Flavored Markdown Alerts
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GitHub-Flavored Markdown Alerts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#supported-alert-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Alert Types
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supported Alert Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#note-alert" class="md-nav__link">
+    <span class="md-ellipsis">
+      NOTE Alert
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tip-alert" class="md-nav__link">
+    <span class="md-ellipsis">
+      TIP Alert
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#important-alert" class="md-nav__link">
+    <span class="md-ellipsis">
+      IMPORTANT Alert
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warning-alert" class="md-nav__link">
+    <span class="md-ellipsis">
+      WARNING Alert
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#caution-alert" class="md-nav__link">
+    <span class="md-ellipsis">
+      CAUTION Alert
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Features
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-line-alert" class="md-nav__link">
+    <span class="md-ellipsis">
+      Single Line Alert
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-line-alert" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-line Alert
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixed-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mixed Content
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-panel-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Panel Syntax
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom Panel Syntax">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#info-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Info Panel
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warning-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Warning Panel
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#success-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Success Panel
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Panel
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#note-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Note Panel
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table of Contents Generation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Table of Contents Generation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#simple-toc" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple TOC
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#doctoc-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      DocToc Integration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#contents-addition" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contents Addition
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#code-blocks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Code Blocks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Code Blocks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fenced-code-blocks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fenced Code Blocks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-block-without-language" class="md-nav__link">
+    <span class="md-ellipsis">
+      Code Block without Language
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Comments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#html-comments" class="md-nav__link">
+    <span class="md-ellipsis">
+      HTML Comments
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references-and-footnotes" class="md-nav__link">
+    <span class="md-ellipsis">
+      References and Footnotes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="References and Footnotes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#footnote-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      Footnote References
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#internal-links" class="md-nav__link">
+    <span class="md-ellipsis">
+      Internal Links
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Internal Links">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#header-anchor-links" class="md-nav__link">
+    <span class="md-ellipsis">
+      Header Anchor Links
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-markdown-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Markdown Sources
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supported Markdown Sources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default Format
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bitbucket-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bitbucket Format
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#images-and-attachments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Images and Attachments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Images and Attachments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#image-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      Image Syntax
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#emoji-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Emoji Support
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Emoji Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#emoji-removal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Emoji Removal
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Features
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#command-line-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Command Line Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Command Line Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#content-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Content Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#markdown-source-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      Markdown Source Format
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#page-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Page Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#processing-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Processing Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#editor-version-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Editor Version Support
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Editor Version Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#editor-version-1-legacy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Editor Version 1 (Legacy)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#editor-version-2-modern" class="md-nav__link">
+    <span class="md-ellipsis">
+      Editor Version 2 (Modern)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#markdown-source-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      Markdown Source Formats
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Markdown Source Formats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default Source
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bitbucket-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bitbucket Source
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#processing-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      Processing Order
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations-and-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limitations and Notes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../markdown-examples/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Examples
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contribute
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CHANGELOG/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    API Documentation
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            API Documentation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/client-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Client
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/converter-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Converter
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/main-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    md_to_conf
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table of Contents
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#standard-markdown-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Standard Markdown Support
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Standard Markdown Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#headers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Headers
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#text-formatting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Text Formatting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lists" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lists
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Lists">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unordered-lists" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unordered Lists
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ordered-lists" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ordered Lists
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#links" class="md-nav__link">
+    <span class="md-ellipsis">
+      Links
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#blockquotes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Blockquotes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#special-confluence-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Special Confluence Features
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Special Confluence Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enhanced-blockquotes-with-status-panels" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enhanced Blockquotes with Status Panels
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Enhanced Blockquotes with Status Panels">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#info-panel-blue-icon" class="md-nav__link">
+    <span class="md-ellipsis">
+      Info Panel (Blue Icon)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warning-panel-yellow-caution-icon" class="md-nav__link">
+    <span class="md-ellipsis">
+      Warning Panel (Yellow Caution Icon)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#success-panel-green-check-icon" class="md-nav__link">
+    <span class="md-ellipsis">
+      Success Panel (Green Check Icon)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-panel-red-cross-icon" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Panel (Red Cross Icon)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#note-panel-special-adf-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      Note Panel (Special ADF Format)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#github-flavored-markdown-alerts" class="md-nav__link">
+    <span class="md-ellipsis">
+      GitHub-Flavored Markdown Alerts
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GitHub-Flavored Markdown Alerts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#supported-alert-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Alert Types
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supported Alert Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#note-alert" class="md-nav__link">
+    <span class="md-ellipsis">
+      NOTE Alert
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tip-alert" class="md-nav__link">
+    <span class="md-ellipsis">
+      TIP Alert
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#important-alert" class="md-nav__link">
+    <span class="md-ellipsis">
+      IMPORTANT Alert
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warning-alert" class="md-nav__link">
+    <span class="md-ellipsis">
+      WARNING Alert
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#caution-alert" class="md-nav__link">
+    <span class="md-ellipsis">
+      CAUTION Alert
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Features
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-line-alert" class="md-nav__link">
+    <span class="md-ellipsis">
+      Single Line Alert
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-line-alert" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-line Alert
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixed-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mixed Content
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-panel-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Panel Syntax
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom Panel Syntax">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#info-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Info Panel
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warning-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Warning Panel
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#success-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Success Panel
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Panel
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#note-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Note Panel
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table of Contents Generation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Table of Contents Generation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#simple-toc" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple TOC
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#doctoc-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      DocToc Integration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#contents-addition" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contents Addition
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#code-blocks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Code Blocks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Code Blocks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fenced-code-blocks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fenced Code Blocks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-block-without-language" class="md-nav__link">
+    <span class="md-ellipsis">
+      Code Block without Language
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Comments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#html-comments" class="md-nav__link">
+    <span class="md-ellipsis">
+      HTML Comments
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references-and-footnotes" class="md-nav__link">
+    <span class="md-ellipsis">
+      References and Footnotes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="References and Footnotes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#footnote-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      Footnote References
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#internal-links" class="md-nav__link">
+    <span class="md-ellipsis">
+      Internal Links
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Internal Links">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#header-anchor-links" class="md-nav__link">
+    <span class="md-ellipsis">
+      Header Anchor Links
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-markdown-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Markdown Sources
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supported Markdown Sources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default Format
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bitbucket-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bitbucket Format
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#images-and-attachments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Images and Attachments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Images and Attachments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#image-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      Image Syntax
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#emoji-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Emoji Support
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Emoji Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#emoji-removal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Emoji Removal
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Features
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#command-line-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Command Line Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Command Line Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#content-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Content Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#markdown-source-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      Markdown Source Format
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#page-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Page Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#processing-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Processing Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#editor-version-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Editor Version Support
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Editor Version Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#editor-version-1-legacy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Editor Version 1 (Legacy)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#editor-version-2-modern" class="md-nav__link">
+    <span class="md-ellipsis">
+      Editor Version 2 (Modern)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#markdown-source-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      Markdown Source Formats
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Markdown Source Formats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default Source
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bitbucket-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bitbucket Source
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#processing-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      Processing Order
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations-and-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limitations and Notes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="markdown-syntax-guide">Markdown Syntax Guide</h1>
+<p>This document describes the standard and special markdown syntax supported by the md_to_conf converter. The converter transforms markdown files into Confluence-compatible HTML using the Python <code>markdown</code> library with additional custom processing.</p>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+<li><a href="#standard-markdown-support">Standard Markdown Support</a></li>
+<li><a href="#special-confluence-features">Special Confluence Features</a></li>
+<li><a href="#github-flavored-markdown-alerts">GitHub-Flavored Markdown Alerts</a></li>
+<li><a href="#custom-panel-syntax">Custom Panel Syntax</a></li>
+<li><a href="#table-of-contents-generation">Table of Contents Generation</a></li>
+<li><a href="#code-blocks">Code Blocks</a></li>
+<li><a href="#comments">Comments</a></li>
+<li><a href="#references-and-footnotes">References and Footnotes</a></li>
+<li><a href="#internal-links">Internal Links</a></li>
+<li><a href="#images-and-attachments">Images and Attachments</a></li>
+<li><a href="#emoji-support">Emoji Support</a></li>
+</ul>
+<h2 id="standard-markdown-support">Standard Markdown Support</h2>
+<p>The converter supports all standard markdown syntax through the Python <code>markdown</code> library with the following extensions enabled:</p>
+<h3 id="headers">Headers</h3>
+<pre><code class="language-markdown"># Header 1
+## Header 2  
+### Header 3
+#### Header 4
+##### Header 5
+###### Header 6
+</code></pre>
+<p>Headers are converted to Confluence headings and can be used as anchor targets for internal links.</p>
+<h3 id="text-formatting">Text Formatting</h3>
+<pre><code class="language-markdown">**Bold text**
+*Italic text*
+***Bold and italic***
+~~Strikethrough~~
+`Inline code`
+</code></pre>
+<h3 id="lists">Lists</h3>
+<h4 id="unordered-lists">Unordered Lists</h4>
+<pre><code class="language-markdown">* Item 1
+* Item 2
+  * Nested item 2.1
+  * Nested item 2.2
+* Item 3
+</code></pre>
+<h4 id="ordered-lists">Ordered Lists</h4>
+<pre><code class="language-markdown">1. First item
+2. Second item
+   1. Nested item 2.1
+   2. Nested item 2.2
+3. Third item
+</code></pre>
+<p>The converter uses the <code>mdx_truly_sane_lists</code> extension for proper nested list handling.</p>
+<h3 id="tables">Tables</h3>
+<pre><code class="language-markdown">| Column 1 | Column 2 | Column 3 |
+|----------|----------|----------|
+| Row 1    | Data     | Data     |
+| Row 2    | Data     | Data     |
+</code></pre>
+<p>Tables are supported through the <code>tables</code> extension and converted to Confluence table format.</p>
+<h3 id="links">Links</h3>
+<pre><code class="language-markdown">[Link text](https://example.com)
+[Link with title](https://example.com &quot;Title&quot;)
+</code></pre>
+<h3 id="blockquotes">Blockquotes</h3>
+<pre><code class="language-markdown">&gt; This is a blockquote
+&gt; 
+&gt; Multiple lines are supported
+</code></pre>
+<p>See <a href="#special-confluence-features">Special Confluence Features</a> for enhanced blockquote functionality.</p>
+<h2 id="special-confluence-features">Special Confluence Features</h2>
+<h3 id="enhanced-blockquotes-with-status-panels">Enhanced Blockquotes with Status Panels</h3>
+<p>The converter automatically detects special blockquote patterns and converts them to Confluence status panels:</p>
+<h4 id="info-panel-blue-icon">Info Panel (Blue Icon)</h4>
+<pre><code class="language-markdown">&gt; This is general information.
+</code></pre>
+<h4 id="warning-panel-yellow-caution-icon">Warning Panel (Yellow Caution Icon)</h4>
+<pre><code class="language-markdown">&gt; Warning: This is a warning message.
+</code></pre>
+<h4 id="success-panel-green-check-icon">Success Panel (Green Check Icon)</h4>
+<pre><code class="language-markdown">&gt; Success: This is a success message.
+</code></pre>
+<h4 id="error-panel-red-cross-icon">Error Panel (Red Cross Icon)</h4>
+<pre><code class="language-markdown">&gt; Error: This is an error message.
+</code></pre>
+<h4 id="note-panel-special-adf-format">Note Panel (Special ADF Format)</h4>
+<pre><code class="language-markdown">&gt; Note: This is a note.
+</code></pre>
+<p><strong>Note:</strong> The type detection is case-insensitive and supports various formats like "Warning:", "Warning :", etc.</p>
+<h2 id="github-flavored-markdown-alerts">GitHub-Flavored Markdown Alerts</h2>
+<p>The converter supports GitHub-flavored markdown alert syntax, which takes precedence over traditional blockquote processing. These alerts provide a standardized way to create different types of callout panels.</p>
+<h3 id="supported-alert-types">Supported Alert Types</h3>
+<h4 id="note-alert">NOTE Alert</h4>
+<pre><code class="language-markdown">&gt; [!NOTE]
+&gt; Useful information that users should know, even when skimming content.
+</code></pre>
+<p>Converts to a Confluence info panel (blue icon).</p>
+<h4 id="tip-alert">TIP Alert</h4>
+<pre><code class="language-markdown">&gt; [!TIP]
+&gt; Helpful advice for doing things better or more easily.
+</code></pre>
+<p>Converts to a Confluence tip panel (green icon).</p>
+<h4 id="important-alert">IMPORTANT Alert</h4>
+<pre><code class="language-markdown">&gt; [!IMPORTANT]
+&gt; Key information users need to know to achieve their goal.
+</code></pre>
+<p>Converts to a special Confluence ADF panel with note styling.</p>
+<h4 id="warning-alert">WARNING Alert</h4>
+<pre><code class="language-markdown">&gt; [!WARNING]
+&gt; Urgent info that needs immediate user attention to avoid problems.
+</code></pre>
+<p>Converts to a Confluence note panel (yellow caution icon).</p>
+<h4 id="caution-alert">CAUTION Alert</h4>
+<pre><code class="language-markdown">&gt; [!CAUTION]
+&gt; Advises about risks or negative outcomes of certain actions.
+</code></pre>
+<p>Converts to a Confluence warning panel (red cross icon).</p>
+<h3 id="features">Features</h3>
+<ul>
+<li><strong>Case Insensitive</strong>: Works with <code>[!note]</code>, <code>[!NOTE]</code>, <code>[!Note]</code>, etc.</li>
+<li><strong>Multi-line Support</strong>: Supports multiple paragraphs within alerts</li>
+<li><strong>HTML Formatting</strong>: Preserves bold, italic, and other formatting inside alerts</li>
+<li><strong>Precedence</strong>: GitHub alerts are processed before traditional blockquote patterns</li>
+<li><strong>Single Line</strong>: Content can be on the same line as the alert type</li>
+</ul>
+<h3 id="examples">Examples</h3>
+<h4 id="single-line-alert">Single Line Alert</h4>
+<pre><code class="language-markdown">&gt; [!WARNING] This is a single-line warning message.
+</code></pre>
+<h4 id="multi-line-alert">Multi-line Alert</h4>
+<pre><code class="language-markdown">&gt; [!IMPORTANT]
+&gt; This is the first paragraph of an important message.
+&gt;
+&gt; This is a second paragraph with **bold** and *italic* formatting.
+</code></pre>
+<h4 id="mixed-content">Mixed Content</h4>
+<pre><code class="language-markdown">&gt; [!TIP]
+&gt; Here's a helpful tip with a code example:
+&gt;
+&gt; ```bash
+&gt; npm install package-name
+&gt; ```
+</code></pre>
+<h2 id="custom-panel-syntax">Custom Panel Syntax</h2>
+<p>For more explicit control over panel types, use the custom tilde syntax:</p>
+<h3 id="info-panel">Info Panel</h3>
+<pre><code class="language-markdown">~?This is an info panel.?~
+</code></pre>
+<h3 id="warning-panel">Warning Panel</h3>
+<pre><code class="language-markdown">~%This is a warning panel.%~
+</code></pre>
+<h3 id="success-panel">Success Panel</h3>
+<pre><code class="language-markdown">~^This is a success panel.^~
+</code></pre>
+<h3 id="error-panel">Error Panel</h3>
+<pre><code class="language-markdown">~$This is an error panel.$~
+</code></pre>
+<h3 id="note-panel">Note Panel</h3>
+<pre><code class="language-markdown">~!This is a note panel.!~
+</code></pre>
+<h2 id="table-of-contents-generation">Table of Contents Generation</h2>
+<h3 id="simple-toc">Simple TOC</h3>
+<pre><code class="language-markdown">[TOC]
+</code></pre>
+<p>This creates a basic table of contents macro in Confluence.</p>
+<h3 id="doctoc-integration">DocToc Integration</h3>
+<pre><code class="language-markdown">&lt;!-- START doctoc generated TOC please keep comment here to allow auto update --&gt;
+&lt;!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE --&gt;
+&lt;!-- END doctoc generated TOC please keep comment here to allow auto update --&gt;
+</code></pre>
+<p>The converter automatically replaces doctoc-generated sections with Confluence TOC macros with advanced parameters:
+- Printable: true
+- Style: disc
+- Max Level: 7
+- Min Level: 1
+- Type: list
+- Outline: clear</p>
+<h3 id="contents-addition">Contents Addition</h3>
+<p>When using the <code>--add-contents</code> option, a comprehensive table of contents is automatically added to the beginning of the page with these parameters:
+- Printable: true
+- Style: disc
+- Max Level: 5
+- Min Level: 1
+- Class: rm-contents
+- Type: list
+- Outline: false</p>
+<h2 id="code-blocks">Code Blocks</h2>
+<h3 id="fenced-code-blocks">Fenced Code Blocks</h3>
+<pre><code class="language-markdown">```javascript
+function example() {
+    return &quot;Hello, World!&quot;;
+}
+```
+</code></pre>
+<h3 id="code-block-without-language">Code Block without Language</h3>
+<pre><code class="language-markdown">```
+This is a generic code block
+```
+</code></pre>
+<p><strong>Features:</strong>
+- All code blocks are converted to Confluence code macros
+- Theme: Midnight (dark theme)
+- Line numbers: enabled
+- Language detection from fence language specification
+- Falls back to "none" if no language specified
+- HTML entities are properly unescaped</p>
+<p><strong>Supported Languages:</strong> Any language supported by Confluence code macros (JavaScript, Python, Java, SQL, etc.)</p>
+<h2 id="comments">Comments</h2>
+<h3 id="html-comments">HTML Comments</h3>
+<pre><code class="language-markdown">&lt;!-- This is a hidden comment --&gt;
+</code></pre>
+<p>HTML comments are converted to Confluence placeholder macros (<code>&lt;ac:placeholder&gt;</code>) which render as hidden comments in Confluence.</p>
+<h2 id="references-and-footnotes">References and Footnotes</h2>
+<h3 id="footnote-references">Footnote References</h3>
+<pre><code class="language-markdown">Here is some text with a footnote reference[^1].
+
+[^1]: This is the footnote content with a [link](https://example.com).
+</code></pre>
+<p><strong>Features:</strong>
+- Footnotes are supported through the <code>footnotes</code> extension
+- References are converted to superscript links
+- Footnote content is processed and linked appropriately</p>
+<h2 id="internal-links">Internal Links</h2>
+<h3 id="header-anchor-links">Header Anchor Links</h3>
+<pre><code class="language-markdown">[Link to section](#header-name)
+</code></pre>
+<p><strong>Features:</strong>
+- Links to headers within the same page are automatically converted
+- Supports both <code>default</code> and <code>bitbucket</code> markdown source formats
+- Different anchor prefixes based on source:
+  - Default: <code>#</code>
+  - Bitbucket: <code>#markdown-header-</code>
+- Proper URL encoding for Confluence page URLs
+- Different output formats for editor versions 1 and 2</p>
+<h3 id="supported-markdown-sources">Supported Markdown Sources</h3>
+<h4 id="default-format">Default Format</h4>
+<pre><code class="language-markdown">[Link to header](#my-header)
+</code></pre>
+<h4 id="bitbucket-format">Bitbucket Format</h4>
+<pre><code class="language-markdown">[Link to header](#markdown-header-my-header)
+</code></pre>
+<h2 id="images-and-attachments">Images and Attachments</h2>
+<h3 id="image-syntax">Image Syntax</h3>
+<pre><code class="language-markdown">![Alt text](path/to/image.png)
+![Alt text with title](path/to/image.png &quot;Image title&quot;)
+</code></pre>
+<p><strong>Features:</strong>
+- Local images are automatically uploaded as Confluence attachments
+- Image paths are converted to Confluence attachment URLs
+- HTTP/HTTPS URLs are left unchanged
+- Alt text is preserved in the attachment metadata</p>
+<p><strong>Automatic Processing:</strong>
+- Local file paths are resolved relative to the markdown file location
+- Images are uploaded to the target Confluence page
+- Image references are updated to point to Confluence attachment URLs
+- Format: <code>/wiki/download/attachments/{page_id}/{filename}</code> or <code>/download/attachments/{page_id}/{filename}</code></p>
+<h2 id="emoji-support">Emoji Support</h2>
+<h3 id="emoji-removal">Emoji Removal</h3>
+<p>When using the <code>--remove-emojies</code> option, the converter removes Unicode emoji characters:</p>
+<p><strong>Removed Emoji Ranges:</strong>
+- Emoticons: <code>\U0001F600-\U0001F64F</code>
+- Symbols &amp; Pictographs: <code>\U0001F300-\U0001F5FF</code><br />
+- Transport &amp; Map Symbols: <code>\U0001F680-\U0001F6FF</code>
+- Flags (iOS): <code>\U0001F1E0-\U0001F1FF</code></p>
+<p><strong>Example:</strong></p>
+<pre><code class="language-markdown">This text has emojis 😀 🎉 🚀 🇺🇸
+</code></pre>
+<p>With <code>--remove-emojies</code>, becomes:</p>
+<pre><code>This text has emojis
+</code></pre>
+<h2 id="advanced-features">Advanced Features</h2>
+<h3 id="command-line-options">Command Line Options</h3>
+<p>The converter supports several command-line options that affect markdown processing:</p>
+<h4 id="content-options">Content Options</h4>
+<ul>
+<li><code>--contents</code> / <code>-c</code>: Generate a comprehensive table of contents at the beginning of the page</li>
+<li><code>--title</code>: Set a custom page title (otherwise uses first line of markdown file)</li>
+<li><code>--remove-emojies</code>: Remove all Unicode emojis from the content</li>
+</ul>
+<h4 id="markdown-source-format">Markdown Source Format</h4>
+<ul>
+<li><code>--markdownsrc</code> / <code>-mds</code>: Specify markdown source format</li>
+<li><code>default</code>: Standard markdown anchor format (<code>#header-name</code>)</li>
+<li><code>bitbucket</code>: Bitbucket-style anchors (<code>#markdown-header-header-name</code>)</li>
+</ul>
+<h4 id="page-management">Page Management</h4>
+<ul>
+<li><code>--label</code>: Add labels to the Confluence page (can be used multiple times)</li>
+<li><code>--property</code>: Set content properties on the page (format: <code>key=value</code>, can be used multiple times)</li>
+<li><code>--attachment</code> / <code>-t</code>: Upload file attachments to the page (paths relative to markdown file)</li>
+</ul>
+<h4 id="processing-options">Processing Options</h4>
+<ul>
+<li><code>--version</code> / <code>-v</code>: Confluence editor version (1 or 2, default: 2)</li>
+<li><code>--simulate</code> / <code>-s</code>: Show conversion result without uploading to Confluence</li>
+<li><code>--delete</code> / <code>-d</code>: Delete the page instead of creating/updating it</li>
+</ul>
+<h3 id="editor-version-support">Editor Version Support</h3>
+<p>The converter supports two editor versions with different output formats:</p>
+<h4 id="editor-version-1-legacy">Editor Version 1 (Legacy)</h4>
+<ul>
+<li>Uses Confluence-specific XML link format</li>
+<li>Internal links: <code>&lt;ac:link ac:anchor="..."&gt;&lt;ac:plain-text-link-body&gt;&lt;![CDATA[...]]&gt;&lt;/ac:plain-text-link-body&gt;&lt;/ac:link&gt;</code></li>
+</ul>
+<h4 id="editor-version-2-modern">Editor Version 2 (Modern)</h4>
+<ul>
+<li>Uses standard HTML anchor links</li>
+<li>Internal links: <code>&lt;a href="...#..." title="..."&gt;...&lt;/a&gt;</code></li>
+<li>Full Confluence page URLs with anchor fragments</li>
+</ul>
+<h3 id="markdown-source-formats">Markdown Source Formats</h3>
+<h4 id="default-source">Default Source</h4>
+<ul>
+<li>Standard markdown anchor format: <code>#header-name</code></li>
+<li>Postfix pattern for duplicates: <code>_%d</code></li>
+</ul>
+<h4 id="bitbucket-source">Bitbucket Source</h4>
+<ul>
+<li>Bitbucket-style anchors: <code>#markdown-header-header-name</code></li>
+<li>Postfix pattern for duplicates: <code>_%d</code></li>
+</ul>
+<h3 id="processing-order">Processing Order</h3>
+<p>The converter processes markdown in this order:
+1. Convert markdown to HTML using Python <code>markdown</code> library
+2. Remove title if not explicitly provided
+3. Process table of contents markers
+4. Convert info/warning/success/error macros
+5. Convert HTML comments to placeholders
+6. Convert code blocks to Confluence macros
+7. Remove emojis (if requested)
+8. Add contents section (if requested)
+9. Process footnote references
+10. Process internal anchor links</p>
+<h2 id="limitations-and-notes">Limitations and Notes</h2>
+<ol>
+<li>
+<p><strong>Internal Links</strong>: Only work within the same page. Cross-page links are not automatically converted.</p>
+</li>
+<li>
+<p><strong>Image Processing</strong>: Only local images are uploaded as attachments. External URLs are preserved as-is.</p>
+</li>
+<li>
+<p><strong>Code Language Detection</strong>: Language detection relies on the fence specification. Unknown languages default to "none".</p>
+</li>
+<li>
+<p><strong>Panel Type Detection</strong>: Blockquote panel type detection is case-insensitive but requires specific keywords (Warning, Success, Error, Note).</p>
+</li>
+<li>
+<p><strong>Anchor Generation</strong>: Anchor names are automatically generated from header text with special character removal and space-to-dash conversion.</p>
+</li>
+<li>
+<p><strong>Nested Lists</strong>: Proper indentation is required for nested list items (2+ spaces for sub-items).</p>
+</li>
+<li>
+<p><strong>Emoji Removal</strong>: When enabled, removes all emojis indiscriminately - cannot selectively preserve certain emojis.</p>
+</li>
+</ol>
+<h2 id="examples_1">Examples</h2>
+<p>For complete examples, see the test files:
+- <code>tests/testfiles/basic.md</code> - Basic markdown features
+- <code>tests/testfiles/advanced.md</code> - Advanced features including panels, nested lists, and internal links</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.1e8ae164.min.js"></script>
+      
+    
+  </body>
+</html>
