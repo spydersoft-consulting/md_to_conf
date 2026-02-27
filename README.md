@@ -14,6 +14,8 @@ The file is converted to HTML and uploaded to Confluence using their `storage` r
 1. Inline images
 2. Code blocks
 3. Some custom markdown tags
+4. Multi-file publishing with automatic cross-document link resolution
+5. Mermaid diagram rendering (via local `mmdc` CLI or the `mermaid.ink` API)
 
 ## Usage
 Please see the [Getting Started](https://spydersoft-consulting.github.io/md_to_conf/getting-started/) documentation for information on using this tool.

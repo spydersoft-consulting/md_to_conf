@@ -1,4 +1,7 @@
 import pytest
+import os
+import tempfile
+from unittest.mock import Mock, patch, MagicMock
 from md_to_conf import MarkdownConverter
 
 
@@ -1331,3 +1334,268 @@ def test_convert_code_block_with_language():
     
     # Verify it's not using "none" as language (which would happen if no language detected)
     assert '<ac:parameter ac:name="language">none</ac:parameter>' not in result
+
+# ---------------------------------------------------------------------------
+# Mermaid diagram rendering tests
+# ---------------------------------------------------------------------------
+
+MERMAID_SOURCE = "graph TD\n    A --> B"
+MERMAID_HTML_BLOCK = (
+    '<pre><code class="language-mermaid">graph TD\n    A --&gt; B</code></pre>'
+)
+
+
+@pytest.fixture
+def mermaid_converter(tmp_path):
+    """MarkdownConverter pointing at a temporary .md file."""
+    md_file = tmp_path / "doc.md"
+    md_file.write_text("# Title\n\nContent")
+    return MarkdownConverter(str(md_file), URL, "default", 2)
+
+
+class TestConvertMermaidDiagrams:
+    """Tests for MarkdownConverter.convert_mermaid_diagrams()"""
+
+    def test_no_mermaid_blocks_returns_html_unchanged(self, mermaid_converter):
+        html = "<p>No mermaid here</p>"
+        result = mermaid_converter.convert_mermaid_diagrams(html)
+        assert result == html
+        assert mermaid_converter.mermaid_images == []
+
+    def test_mermaid_block_replaced_with_img_tag_on_success(self, mermaid_converter):
+        with patch.object(mermaid_converter, "_render_mermaid") as mock_render:
+            def render_and_create_file(source, output_path):
+                # simulate writing the PNG so the converter can reference it
+                open(output_path, "wb").close()
+                return True
+            mock_render.side_effect = render_and_create_file
+
+            result = mermaid_converter.convert_mermaid_diagrams(MERMAID_HTML_BLOCK)
+
+        assert '<pre><code class="language-mermaid">' not in result
+        assert '<img src="' in result
+        assert 'alt="mermaid-diagram-1"' in result
+        assert len(mermaid_converter.mermaid_images) == 1
+
+    def test_mermaid_image_path_stored_in_mermaid_images(self, mermaid_converter):
+        with patch.object(mermaid_converter, "_render_mermaid") as mock_render:
+            def render_and_create_file(source, output_path):
+                open(output_path, "wb").close()
+                return True
+            mock_render.side_effect = render_and_create_file
+
+            mermaid_converter.convert_mermaid_diagrams(MERMAID_HTML_BLOCK)
+
+        assert len(mermaid_converter.mermaid_images) == 1
+        assert mermaid_converter.mermaid_images[0].endswith("mermaid_1.png")
+
+    def test_failed_render_leaves_code_block_intact(self, mermaid_converter):
+        with patch.object(mermaid_converter, "_render_mermaid", return_value=False):
+            result = mermaid_converter.convert_mermaid_diagrams(MERMAID_HTML_BLOCK)
+
+        assert MERMAID_HTML_BLOCK in result
+        assert mermaid_converter.mermaid_images == []
+
+    def test_multiple_mermaid_blocks(self, mermaid_converter):
+        block2 = '<pre><code class="language-mermaid">sequenceDiagram\n    A->>B: Hello</code></pre>'
+        html = MERMAID_HTML_BLOCK + "\n" + block2
+
+        with patch.object(mermaid_converter, "_render_mermaid") as mock_render:
+            def render_and_create_file(source, output_path):
+                open(output_path, "wb").close()
+                return True
+            mock_render.side_effect = render_and_create_file
+
+            result = mermaid_converter.convert_mermaid_diagrams(html)
+
+        assert result.count("<img ") == 2
+        assert 'alt="mermaid-diagram-1"' in result
+        assert 'alt="mermaid-diagram-2"' in result
+        assert len(mermaid_converter.mermaid_images) == 2
+
+    def test_partial_failure_keeps_failed_block(self, mermaid_converter):
+        """First diagram renders; second fails — first becomes <img>, second stays."""
+        block2 = '<pre><code class="language-mermaid">sequenceDiagram\n    A->>B: Hi</code></pre>'
+        html = MERMAID_HTML_BLOCK + "\n" + block2
+        results = [True, False]
+
+        call_count = {"n": 0}
+
+        def side_effect(source, output_path):
+            success = results[call_count["n"]]
+            if success:
+                open(output_path, "wb").close()
+            call_count["n"] += 1
+            return success
+
+        with patch.object(mermaid_converter, "_render_mermaid", side_effect=side_effect):
+            result = mermaid_converter.convert_mermaid_diagrams(html)
+
+        assert result.count("<img ") == 1
+        assert block2 in result
+        assert len(mermaid_converter.mermaid_images) == 1
+
+    def test_html_entities_unescaped_before_render(self, mermaid_converter):
+        """Verify mermaid source has HTML entities decoded before being passed to renderer."""
+        html = '<pre><code class="language-mermaid">A &amp; B --&gt; C</code></pre>'
+
+        captured = {}
+
+        def capture_source(source, output_path):
+            captured["source"] = source
+            open(output_path, "wb").close()
+            return True
+
+        with patch.object(mermaid_converter, "_render_mermaid", side_effect=capture_source):
+            mermaid_converter.convert_mermaid_diagrams(html)
+
+        assert "&amp;" not in captured["source"]
+        assert "A & B --> C" == captured["source"]
+
+
+class TestRenderMermaid:
+    """Tests for MarkdownConverter._render_mermaid()"""
+
+    def test_mmdc_success(self, mermaid_converter, tmp_path):
+        output_path = str(tmp_path / "out.png")
+
+        def fake_run(cmd, **kwargs):
+            # simulate mmdc writing the file
+            open(output_path, "wb").close()
+            result = MagicMock()
+            result.returncode = 0
+            return result
+
+        with patch("shutil.which", return_value="/usr/bin/mmdc"):
+            with patch("subprocess.run", side_effect=fake_run):
+                result = mermaid_converter._render_mermaid(MERMAID_SOURCE, output_path)
+
+        assert result is True
+        assert os.path.exists(output_path)
+
+    def test_mmdc_nonzero_exit_falls_back_to_ink(self, mermaid_converter, tmp_path):
+        output_path = str(tmp_path / "out.png")
+
+        bad_run = MagicMock()
+        bad_run.returncode = 1
+        bad_run.stderr = b"error"
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.content = b"\x89PNG\r\n"
+
+        with patch("shutil.which", return_value="/usr/bin/mmdc"):
+            with patch("subprocess.run", return_value=bad_run):
+                with patch("requests.get", return_value=mock_response):
+                    result = mermaid_converter._render_mermaid(MERMAID_SOURCE, output_path)
+
+        assert result is True
+        with open(output_path, "rb") as f:
+            assert f.read() == b"\x89PNG\r\n"
+
+    def test_mmdc_not_found_falls_back_to_ink(self, mermaid_converter, tmp_path):
+        output_path = str(tmp_path / "out.png")
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.content = b"\x89PNG\r\n"
+
+        with patch("shutil.which", return_value=None):
+            with patch("requests.get", return_value=mock_response):
+                result = mermaid_converter._render_mermaid(MERMAID_SOURCE, output_path)
+
+        assert result is True
+
+    def test_ink_returns_non_200(self, mermaid_converter, tmp_path):
+        output_path = str(tmp_path / "out.png")
+
+        bad_response = MagicMock()
+        bad_response.status_code = 500
+
+        with patch("shutil.which", return_value=None):
+            with patch("requests.get", return_value=bad_response):
+                result = mermaid_converter._render_mermaid(MERMAID_SOURCE, output_path)
+
+        assert result is False
+
+    def test_ink_request_exception(self, mermaid_converter, tmp_path):
+        import requests as req_module
+
+        output_path = str(tmp_path / "out.png")
+
+        with patch("shutil.which", return_value=None):
+            with patch("requests.get", side_effect=req_module.exceptions.ConnectionError("no network")):
+                result = mermaid_converter._render_mermaid(MERMAID_SOURCE, output_path)
+
+        assert result is False
+
+    def test_mmdc_subprocess_exception_falls_back_to_ink(self, mermaid_converter, tmp_path):
+        output_path = str(tmp_path / "out.png")
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.content = b"\x89PNG\r\n"
+
+        with patch("shutil.which", return_value="/usr/bin/mmdc"):
+            with patch("subprocess.run", side_effect=FileNotFoundError("mmdc missing")):
+                with patch("requests.get", return_value=mock_response):
+                    result = mermaid_converter._render_mermaid(MERMAID_SOURCE, output_path)
+
+        assert result is True
+
+    def test_ink_url_contains_base64_encoded_source(self, mermaid_converter, tmp_path):
+        """Confirm the mermaid.ink URL is built from base64-encoded diagram source."""
+        import base64
+
+        output_path = str(tmp_path / "out.png")
+        captured_urls = []
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.content = b"\x89PNG"
+
+        def capture_get(url, **kwargs):
+            captured_urls.append(url)
+            return mock_response
+
+        with patch("shutil.which", return_value=None):
+            with patch("requests.get", side_effect=capture_get):
+                mermaid_converter._render_mermaid(MERMAID_SOURCE, output_path)
+
+        assert len(captured_urls) == 1
+        expected_b64 = base64.urlsafe_b64encode(MERMAID_SOURCE.encode()).decode()
+        assert expected_b64 in captured_urls[0]
+        assert captured_urls[0].startswith("https://mermaid.ink/img/")
+
+
+class TestConvertMdToConfHtmlMermaid:
+    """Integration tests for render_mermaid flag through convert_md_to_conf_html."""
+
+    def test_render_mermaid_false_does_not_call_convert_mermaid(self, mermaid_converter):
+        with patch.object(mermaid_converter, "convert_mermaid_diagrams") as mock_mermaid:
+            mermaid_converter.convert_md_to_conf_html(render_mermaid=False)
+        mock_mermaid.assert_not_called()
+
+    def test_render_mermaid_true_calls_convert_mermaid(self, mermaid_converter):
+        with patch.object(
+            mermaid_converter, "convert_mermaid_diagrams", return_value="<p>html</p>"
+        ) as mock_mermaid:
+            mermaid_converter.convert_md_to_conf_html(render_mermaid=True)
+        mock_mermaid.assert_called_once()
+
+    def test_mermaid_block_not_turned_into_code_macro_when_rendered(self, mermaid_converter, tmp_path):
+        """A rendered mermaid block must NOT appear as a Confluence code macro."""
+        with patch.object(mermaid_converter, "_render_mermaid") as mock_render:
+            def render_and_create(source, output_path):
+                open(output_path, "wb").close()
+                return True
+            mock_render.side_effect = render_and_create
+            # inject mermaid content into the file
+            md_file = tmp_path / "mermaid_doc.md"
+            md_file.write_text("# Title\n\n```mermaid\ngraph TD\n    A --> B\n```\n")
+            conv = MarkdownConverter(str(md_file), URL, "default", 2)
+            with patch.object(conv, "_render_mermaid", side_effect=render_and_create):
+                html = conv.convert_md_to_conf_html(has_title=True, render_mermaid=True)
+
+        assert 'ac:name="code"' not in html or "mermaid" not in html
+        assert "<img " in html

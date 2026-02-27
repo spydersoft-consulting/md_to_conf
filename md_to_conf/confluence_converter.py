@@ -51,6 +51,8 @@ class ConfluenceConverter:
         labels: typing.List[str],
         properties: dict,
         attachments: typing.List[str],
+        render_mermaid: bool = False,
+        page_map: typing.Optional[typing.Dict[str, dict]] = None,
     ):
         converter = MarkdownConverter(
             self.file, self.get_confluence_api_url(), self.md_source, self.version
@@ -69,6 +71,7 @@ class ConfluenceConverter:
             has_title=has_title,
             remove_emojies=remove_emojies,
             add_contents=add_contents,
+            render_mermaid=render_mermaid,
         )
 
         LOGGER.debug("html: %s", html)
@@ -90,16 +93,25 @@ class ConfluenceConverter:
             page = self.confluence_client.create_page(title, html, parent_page_id)
 
         LOGGER.info("Page Id %d" % page.id)
+
+        # Upload mermaid-generated images before add_images so they are
+        # treated like any other attachment already on the page.
+        if render_mermaid and converter.mermaid_images:
+            for img_path in converter.mermaid_images:
+                self.confluence_client.upload_attachment(page.id, img_path, "")
+
         html = self.add_images(page.id, html)
         # Add local references
         html = self.add_local_refs(page.id, title, html, converter)
+
+        if page_map:
+            html = self.add_cross_file_links(html, page_map)
 
         self.confluence_client.update_page(
             page.id, title, html, page.version, parent_page_id
         )
 
         properties_for_update = self.get_properties_to_update(properties, page.id)
-
         if len(properties_for_update) > 0:
             LOGGER.info(
                 "Updating %s page content properties..." % len(properties_for_update)
@@ -115,6 +127,19 @@ class ConfluenceConverter:
             self.add_attachments(page.id, attachments)
 
         LOGGER.info("Markdown Converter completed successfully.")
+
+        # Return published page info for cross-file link resolution
+        return {
+            "page_id": page.id,
+            "title": title,
+            "url": "%s/spaces/%s/pages/%d/%s"
+            % (
+                self.get_confluence_api_url(),
+                self.space_key,
+                page.id,
+                "+".join(title.split()),
+            ),
+        }
 
     def add_attachments(self, page_id: int, files: typing.List[str]):
         """
@@ -214,6 +239,70 @@ class ConfluenceConverter:
         html = converter.process_links(
             html, links, headers_map, self.space_key, page_id, title
         )
+
+        return html
+
+    def add_cross_file_links(
+        self,
+        html: str,
+        page_map: typing.Dict[str, dict],
+    ) -> str:
+        """
+        Replace inter-document Markdown links with Confluence page URLs.
+
+        When multiple Markdown files are published together, links like
+        ``href="other-doc.md"`` or ``href="../docs/guide.md#section"`` are
+        resolved against the current file's directory, looked up in
+        *page_map*, and replaced with the published Confluence page URL.
+
+        Links that do not resolve to a known page are left unchanged.
+
+        Args:
+            html: HTML string for the current page
+            page_map: Mapping of *absolute file path* →
+                      ``{"page_id": int, "title": str, "url": str}``
+
+        Returns:
+            modified HTML string
+        """
+        source_dir = os.path.dirname(os.path.abspath(self.file))
+
+        # Match any <a href="..."> that looks like a relative .md path
+        md_links = re.findall(
+            r'<a href="((?![#"])(?:(?!\.md)[^"])*\.md(?:#[^"]*)?)">',
+            html,
+        )
+
+        for raw_href in md_links:
+            # Split off optional anchor fragment
+            if "#" in raw_href:
+                md_part, fragment = raw_href.split("#", 1)
+            else:
+                md_part, fragment = raw_href, ""
+
+            # Resolve to absolute path
+            abs_path = os.path.normpath(os.path.join(source_dir, md_part))
+
+            entry = page_map.get(abs_path)
+            if entry is None:
+                LOGGER.debug(
+                    "Cross-file link %s not found in page_map — skipping.", abs_path
+                )
+                continue
+
+            base_url = entry["url"]
+            if fragment:
+                new_href = "%s#%s" % (base_url, fragment)
+            else:
+                new_href = base_url
+
+            LOGGER.debug(
+                "Replacing cross-file link %s → %s", raw_href, new_href
+            )
+            html = html.replace(
+                'href="%s"' % raw_href,
+                'href="%s"' % new_href,
+            )
 
         return html
 
