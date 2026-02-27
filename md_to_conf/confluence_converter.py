@@ -269,7 +269,7 @@ class ConfluenceConverter:
 
         # Match any <a href="..."> that looks like a relative .md path
         md_links = re.findall(
-            r'<a href="([^"#][^"]*?\.md(?:#[^"]*)?)">',
+            r'<a href="((?![#"])[^"]*\.md(?:#[^"]*)?)">',
             html,
         )
 
