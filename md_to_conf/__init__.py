@@ -144,6 +144,20 @@ def get_parser():
             "falls back to the mermaid.ink public API (requires internet)."
         ),
     )
+    PARSER.add_argument(
+        "--exclude",
+        action="append",
+        dest="exclude_patterns",
+        default=[],
+        metavar="PATTERN",
+        help=(
+            "Glob pattern of files to exclude from publishing. "
+            "Can be specified multiple times. "
+            "Example: --exclude 'docs/draft*.md' --exclude 'docs/wip/**'. "
+            "Inline exclusions using a '!' prefix in the file list are also "
+            "supported, e.g. '!docs/draft.md'."
+        ),
+    )
 
     return PARSER
 
@@ -168,12 +182,11 @@ def validate_args(user_name, api_key, markdown_files, org_name):
         sys.exit(1)
 
 
-def expand_file_globs(patterns):
+def _expand_include_patterns(patterns):
     """
-    Expand a list of file path patterns (which may include shell glob
-    characters) into a de-duplicated, ordered list of absolute paths.
-    Patterns that match no files are treated as literal paths (so the
-    missing-file error is reported by validate_args).
+    Expand a list of include glob patterns into a de-duplicated, ordered
+    list of absolute paths.  Patterns that match no files are treated as
+    literal paths so that validate_args can report the missing file.
     """
     expanded = []
     seen = set()
@@ -191,6 +204,44 @@ def expand_file_globs(patterns):
                 seen.add(abs_path)
                 expanded.append(abs_path)
     return expanded
+
+
+def expand_file_globs(patterns, exclude_patterns=None):
+    """
+    Expand a list of file path patterns into a de-duplicated, ordered list
+    of absolute paths, then remove any paths that match an exclusion pattern.
+
+    Include patterns:
+      - Standard file paths or shell globs (``docs/*.md``, ``**/*.md``).
+      - A pattern prefixed with ``!`` is treated as an exclusion instead of
+        an include, e.g. ``!docs/draft.md`` or ``!drafts/**``.
+
+    Exclusion patterns (applied last, highest precedence):
+      - Passed via the ``exclude_patterns`` argument (populated from the
+        ``--exclude`` CLI flag).
+      - Also accepted inline as ``!``-prefixed entries in *patterns*.
+
+    Patterns that match no files are treated as literal paths (so the
+    missing-file error is reported by validate_args for include patterns;
+    non-matching exclude patterns are silently ignored).
+    """
+    include = [p for p in patterns if not p.startswith("!")]
+    inline_excludes = [p[1:] for p in patterns if p.startswith("!")]
+    all_excludes = list(inline_excludes) + list(exclude_patterns or [])
+
+    # Build the excluded set
+    excluded = set()
+    for pattern in all_excludes:
+        matches = glob.glob(pattern, recursive=True)
+        if matches:
+            for path in matches:
+                excluded.add(os.path.abspath(path))
+        else:
+            # Treat as a literal path
+            excluded.add(os.path.abspath(pattern))
+
+    expanded = _expand_include_patterns(include)
+    return [p for p in expanded if p not in excluded]
 
 
 def main():
@@ -216,7 +267,7 @@ def main():
         # Set log level
         LOGGER.setLevel(getattr(logging, ARGS.loglevel.upper(), None))
 
-        MARKDOWN_FILES = expand_file_globs(ARGS.markdownFile)
+        MARKDOWN_FILES = expand_file_globs(ARGS.markdownFile, ARGS.exclude_patterns)
         SPACE_KEY = ARGS.spacekey
         USERNAME = os.getenv("CONFLUENCE_USERNAME", ARGS.username)
         API_KEY = os.getenv("CONFLUENCE_API_KEY", ARGS.apikey)

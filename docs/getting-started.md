@@ -50,6 +50,25 @@ md-to-conf "docs/*.md" TST -a "Documentation"
 md-to-conf "docs/**/*.md" TST -a "Documentation"
 ```
 
+#### Excluding Files
+
+Use `--exclude` to skip files that match a glob pattern. It can be repeated:
+
+```bash
+# Exclude draft files from a wildcard publish
+md-to-conf "docs/**/*.md" TST -a "Documentation" \
+  --exclude "docs/drafts/**" \
+  --exclude "docs/wip*.md"
+```
+
+You can also prefix individual paths with `!` inline:
+
+```bash
+md-to-conf "docs/*.md" "!docs/draft.md" TST -a "Documentation"
+```
+
+Both forms can be combined. `--exclude` and `!`-prefixed entries are equivalent and applied after all include patterns are resolved.
+
 #### Cross-Document Link Resolution
 
 When multiple files are published together, any relative Markdown links between them are automatically rewritten to the correct Confluence page URLs — including optional `#fragment` anchors:

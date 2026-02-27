@@ -483,6 +483,7 @@ The converter supports several command-line options that affect markdown process
 - `--title`: Set a custom page title (otherwise uses first line of markdown file)
 - `--remove-emojies`: Remove all Unicode emojis from the content
 - `--mermaid`: Render `mermaid` fenced code blocks as PNG images before uploading. Uses local `mmdc` CLI if available, otherwise falls back to the `mermaid.ink` public API.
+- `--exclude PATTERN`: Exclude files matching a glob pattern from publishing. Can be specified multiple times. Inline `!`-prefixed entries in the file list are equivalent.
 
 #### Markdown Source Format
 - `--markdownsrc` / `-mds`: Specify markdown source format
