@@ -10,9 +10,11 @@ This document describes the standard and special markdown syntax supported by th
 - [Custom Panel Syntax](#custom-panel-syntax)
 - [Table of Contents Generation](#table-of-contents-generation)
 - [Code Blocks](#code-blocks)
+- [Mermaid Diagrams](#mermaid-diagrams)
 - [Comments](#comments)
 - [References and Footnotes](#references-and-footnotes)
 - [Internal Links](#internal-links)
+- [Cross-Document Links](#cross-document-links)
 - [Images and Attachments](#images-and-attachments)
 - [Emoji Support](#emoji-support)
 
@@ -296,7 +298,89 @@ This is a generic code block
 
 **Supported Languages:** Any language supported by Confluence code macros (JavaScript, Python, Java, SQL, etc.)
 
-## Comments
+## Mermaid Diagrams
+
+When `--mermaid` is passed on the command line, fenced code blocks tagged `mermaid` are rendered to PNG images and uploaded as page attachments before the page is published.
+
+### Syntax
+
+````markdown
+```mermaid
+graph TD
+    A[Start] --> B{Decision}
+    B -->|Yes| C[Do it]
+    B -->|No| D[Skip it]
+```
+````
+
+### Supported Diagram Types
+
+All Mermaid diagram types are supported, including:
+
+- **Flowcharts** (`graph TD`, `flowchart LR`, …)
+- **Sequence diagrams** (`sequenceDiagram`)
+- **Class diagrams** (`classDiagram`)
+- **State diagrams** (`stateDiagram-v2`)
+- **Entity-Relationship diagrams** (`erDiagram`)
+- **Gantt charts** (`gantt`)
+- **Pie charts** (`pie`)
+- **Git graphs** (`gitGraph`)
+
+### Rendering Strategies
+
+Rendering is attempted in this order:
+
+1. **Local `mmdc` CLI** — Used when `mmdc` (`@mermaid-js/mermaid-cli`) is on `PATH`.  No network required, best quality.
+2. **`mermaid.ink` public API** — Automatic fallback when `mmdc` is unavailable.  Requires outbound HTTPS.
+
+If rendering fails, the original fenced code block is preserved and a warning is logged.
+
+### Notes
+
+- HTML entities (e.g. `&amp;`, `&gt;`) in the code block are decoded before being sent to the renderer.
+- Each diagram is numbered sequentially: `mermaid_1.png`, `mermaid_2.png`, …
+- Generated images are uploaded as Confluence page attachments alongside any other images.
+
+## Cross-Document Links
+
+When multiple Markdown files are published in a single `md-to-conf` invocation, relative links between those files are automatically rewritten to the corresponding Confluence page URLs.
+
+### Syntax
+
+Standard Markdown relative links:
+
+```markdown
+[Guide](guide.md)
+[API Reference](reference.md#api-section)
+[Sibling doc](../other/page.md)
+```
+
+### Resolution Rules
+
+- The link target is resolved relative to the directory of the file containing the link.
+- If the resolved path matches one of the files being published, the link is rewritten to the Confluence page URL.
+- Fragment anchors (`#section`) are preserved and appended to the Confluence URL.
+- Links pointing to files **not** in the current publish batch are left unchanged.
+
+### Example
+
+Given three files published together:
+
+```bash
+md-to-conf "docs/*.md" TST -a "My Docs"
+```
+
+A link in `docs/intro.md`:
+
+```markdown
+See the [Architecture Overview](architecture.md#components) for details.
+```
+
+Becomes (after publishing):
+
+```html
+<a href="https://example.atlassian.net/wiki/spaces/TST/pages/42/Architecture+Overview#components">Architecture Overview</a>
+```
 
 ### HTML Comments
 ```markdown
@@ -398,6 +482,7 @@ The converter supports several command-line options that affect markdown process
 - `--contents` / `-c`: Generate a comprehensive table of contents at the beginning of the page
 - `--title`: Set a custom page title (otherwise uses first line of markdown file)
 - `--remove-emojies`: Remove all Unicode emojis from the content
+- `--mermaid`: Render `mermaid` fenced code blocks as PNG images before uploading. Uses local `mmdc` CLI if available, otherwise falls back to the `mermaid.ink` public API.
 
 #### Markdown Source Format
 - `--markdownsrc` / `-mds`: Specify markdown source format
@@ -445,15 +530,17 @@ The converter processes markdown in this order:
 3. Process table of contents markers
 4. Convert info/warning/success/error macros
 5. Convert HTML comments to placeholders
-6. Convert code blocks to Confluence macros
-7. Remove emojis (if requested)
-8. Add contents section (if requested)
-9. Process footnote references
-10. Process internal anchor links
+6. Render Mermaid diagrams to images (if `--mermaid` is set)
+7. Convert code blocks to Confluence macros
+8. Remove emojis (if requested)
+9. Add contents section (if requested)
+10. Process footnote references
+11. Process internal anchor links
+12. Rewrite cross-document links (if multiple files are being published)
 
 ## Limitations and Notes
 
-1. **Internal Links**: Only work within the same page. Cross-page links are not automatically converted.
+1. **Cross-Page Links (single-file mode)**: When publishing a single file, links to other `.md` files are not rewritten. Publish files together in one invocation to enable automatic cross-document link resolution.
 
 2. **Image Processing**: Only local images are uploaded as attachments. External URLs are preserved as-is.
 
@@ -466,6 +553,8 @@ The converter processes markdown in this order:
 6. **Nested Lists**: Proper indentation is required for nested list items (2+ spaces for sub-items).
 
 7. **Emoji Removal**: When enabled, removes all emojis indiscriminately - cannot selectively preserve certain emojis.
+
+8. **Mermaid Rendering**: Requires either `mmdc` on `PATH` or outbound HTTPS access to `mermaid.ink`. If neither is available, the original fenced block is preserved.
 
 ## Examples
 

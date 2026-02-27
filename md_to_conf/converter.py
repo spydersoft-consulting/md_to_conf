@@ -1,8 +1,15 @@
+import base64
+import html as html_lib
 import logging
+import os
 import re
 import codecs
-import markdown
+import shutil
+import subprocess
+import tempfile
 import typing
+import markdown
+import requests
 
 LOGGER = logging.getLogger(__name__)
 
@@ -29,12 +36,15 @@ class MarkdownConverter:
         self.api_url = api_url
         self.md_source = md_source
         self.editor_version = editor_version
+        # Populated by convert_mermaid_diagrams; callers can read this list
+        self.mermaid_images: typing.List[str] = []
 
     def convert_md_to_conf_html(
         self,
         has_title: bool = False,
         remove_emojies: bool = False,
         add_contents: bool = False,
+        render_mermaid: bool = False,
     ):
         """
         Convert the Markdown file to Confluence HTML
@@ -43,6 +53,7 @@ class MarkdownConverter:
             has_title: Was a title provided via the CLI?
             remove_emojies: Should emojies be removed?
             add_contents: Should a contents section be added to the page
+            render_mermaid: Render mermaid diagrams to images before upload
 
         Returns:
             A string representing HTML for the Markdown page
@@ -56,6 +67,10 @@ class MarkdownConverter:
         html = self.create_table_of_content(html)
         html = self.convert_info_macros(html)
         html = self.convert_comment_block(html)
+
+        if render_mermaid:
+            html = self.convert_mermaid_diagrams(html)
+
         html = self.convert_code_block(html)
 
         if remove_emojies:
@@ -173,6 +188,123 @@ class MarkdownConverter:
                 html = html.replace(tag, conf_ml)
 
         return html
+
+    def convert_mermaid_diagrams(self, html: str) -> str:
+        """
+        Convert mermaid code blocks to inline images.
+
+        Each ``mermaid`` fenced code block is rendered to a PNG file stored in
+        a temporary directory.  The generated file paths are appended to
+        ``self.mermaid_images`` so that ``ConfluenceConverter.add_images``
+        can upload them as attachments.
+
+        Rendering strategy (in order):
+        1. ``mmdc`` (mermaid-cli) if found on ``PATH`` — no network required.
+        2. ``mermaid.ink`` public API — requires outbound HTTPS.
+
+        If rendering fails the original code block is left untouched.
+
+        Args:
+            html: HTML string produced by earlier conversion steps
+
+        Returns:
+            modified HTML string with mermaid code blocks replaced by <img> tags
+        """
+        mermaid_blocks = re.findall(
+            r'<pre><code class="language-mermaid">(.*?)</code></pre>',
+            html,
+            re.DOTALL,
+        )
+
+        if not mermaid_blocks:
+            return html
+
+        tmp_dir = tempfile.mkdtemp(prefix="md_to_conf_mermaid_")
+
+        for i, block in enumerate(mermaid_blocks):
+            mermaid_source = html_lib.unescape(block)
+            img_filename = "mermaid_%d.png" % (i + 1)
+            img_path = os.path.join(tmp_dir, img_filename)
+
+            success = self._render_mermaid(mermaid_source, img_path)
+            if success:
+                self.mermaid_images.append(img_path)
+                img_tag = '<img src="%s" alt="mermaid-diagram-%d" />' % (
+                    img_path,
+                    i + 1,
+                )
+                html = html.replace(
+                    '<pre><code class="language-mermaid">%s</code></pre>' % block,
+                    img_tag,
+                )
+            else:
+                LOGGER.warning(
+                    "Could not render mermaid diagram %d — leaving code block intact.",
+                    i + 1,
+                )
+
+        return html
+
+    def _render_mermaid(self, source: str, output_path: str) -> bool:
+        """
+        Render a single mermaid diagram to a PNG file.
+
+        Tries ``mmdc`` first, then ``mermaid.ink``.
+
+        Args:
+            source: Mermaid diagram source text
+            output_path: Absolute path for the output PNG
+
+        Returns:
+            True if the image was written successfully
+        """
+        # ── Strategy 1: local mmdc ──────────────────────────────────────────
+        mmdc_path = shutil.which("mmdc")
+        if mmdc_path:
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".mmd", delete=False
+            ) as tmp_mmd:
+                tmp_mmd.write(source)
+                tmp_mmd_path = tmp_mmd.name
+            try:
+                result = subprocess.run(
+                    [mmdc_path, "-i", tmp_mmd_path, "-o", output_path, "-e", "png"],
+                    capture_output=True,
+                    timeout=60,
+                )
+                if result.returncode == 0 and os.path.exists(output_path):
+                    LOGGER.debug("Mermaid rendered via mmdc: %s", output_path)
+                    return True
+                LOGGER.warning(
+                    "mmdc returned exit code %d: %s",
+                    result.returncode,
+                    result.stderr.decode(errors="replace"),
+                )
+            except Exception as exc:
+                LOGGER.warning("mmdc execution failed: %s", exc)
+            finally:
+                try:
+                    os.unlink(tmp_mmd_path)
+                except OSError:
+                    pass
+
+        # ── Strategy 2: mermaid.ink public API ─────────────────────────────
+        try:
+            encoded = base64.urlsafe_b64encode(source.encode("utf-8")).decode("ascii")
+            url = "https://mermaid.ink/img/%s" % encoded
+            response = requests.get(url, timeout=30)
+            if response.status_code == 200:
+                with open(output_path, "wb") as img_file:
+                    img_file.write(response.content)
+                LOGGER.debug("Mermaid rendered via mermaid.ink: %s", output_path)
+                return True
+            LOGGER.warning(
+                "mermaid.ink returned HTTP %d for diagram", response.status_code
+            )
+        except Exception as exc:
+            LOGGER.error("mermaid.ink request failed: %s", exc)
+
+        return False
 
     def remove_emojies(self, html: str) -> str:
         """

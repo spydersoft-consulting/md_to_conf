@@ -610,7 +610,7 @@ class TestConfluenceConverter:
 
         # Verify that convert_md_to_conf_html was called with has_title=False
         mock_converter.convert_md_to_conf_html.assert_called_once_with(
-            has_title=False, remove_emojies=False, add_contents=False
+            has_title=False, remove_emojies=False, add_contents=False, render_mermaid=False
         )
 
     @patch("md_to_conf.confluence_converter.MarkdownConverter")
@@ -658,6 +658,7 @@ class TestConfluenceConverter:
             has_title=True,  # Title was provided in fixture
             remove_emojies=True,
             add_contents=True,
+            render_mermaid=False,
         )
 
     def test_add_images_multiple_images(self, confluence_converter):
@@ -731,3 +732,200 @@ class TestConfluenceConverter:
         # Check new property addition
         new_prop = next(prop for prop in result if prop["key"] == "new_prop")
         assert new_prop == {"key": "new_prop", "version": 1, "value": "new_value"}
+
+
+# ---------------------------------------------------------------------------
+# Cross-file link resolution tests
+# ---------------------------------------------------------------------------
+
+
+class TestAddCrossFileLinks:
+    """Tests for ConfluenceConverter.add_cross_file_links()"""
+
+    @pytest.fixture
+    def cc_with_tempfile(self, tmp_path):
+        """ConfluenceConverter whose source file lives in a real temp dir."""
+        md_file = tmp_path / "source.md"
+        md_file.write_text("# Source\n\nContent")
+        with patch("md_to_conf.confluence_converter.ConfluenceApiClient"):
+            conv = ConfluenceConverter(
+                file=str(md_file),
+                md_source="default",
+                title="Source",
+                org_name="test-org",
+                use_ssl=True,
+                user_name="testuser",
+                space_key="TEST",
+                api_key="test-api-key",
+                ancestor=None,
+                version=2,
+            )
+        return conv, tmp_path
+
+    def test_simple_md_link_replaced(self, cc_with_tempfile):
+        conv, tmp_path = cc_with_tempfile
+        other_abs = os.path.normpath(os.path.join(conv.source_folder, "other.md"))
+        page_map = {
+            other_abs: {
+                "page_id": 42,
+                "title": "Other Page",
+                "url": "https://example.atlassian.net/wiki/spaces/TEST/pages/42/Other+Page",
+            }
+        }
+        html = '<p>See <a href="other.md">Other Page</a>.</p>'
+        result = conv.add_cross_file_links(html, page_map)
+        assert 'href="https://example.atlassian.net/wiki/spaces/TEST/pages/42/Other+Page"' in result
+        assert 'href="other.md"' not in result
+
+    def test_md_link_with_fragment_preserved(self, cc_with_tempfile):
+        conv, tmp_path = cc_with_tempfile
+        other_abs = os.path.normpath(os.path.join(conv.source_folder, "guide.md"))
+        page_map = {
+            other_abs: {
+                "page_id": 99,
+                "title": "Guide",
+                "url": "https://example.atlassian.net/wiki/spaces/TEST/pages/99/Guide",
+            }
+        }
+        html = '<a href="guide.md#installation">Install</a>'
+        result = conv.add_cross_file_links(html, page_map)
+        assert 'href="https://example.atlassian.net/wiki/spaces/TEST/pages/99/Guide#installation"' in result
+
+    def test_unknown_md_link_left_unchanged(self, cc_with_tempfile):
+        conv, tmp_path = cc_with_tempfile
+        page_map = {}  # no known pages
+        html = '<a href="unknown.md">Unknown</a>'
+        result = conv.add_cross_file_links(html, page_map)
+        assert 'href="unknown.md"' in result
+
+    def test_relative_parent_dir_link_resolved(self, cc_with_tempfile):
+        conv, tmp_path = cc_with_tempfile
+        sibling_dir = tmp_path / "sibling"
+        sibling_dir.mkdir()
+        sibling_abs = os.path.normpath(str(sibling_dir / "page.md"))
+        page_map = {
+            sibling_abs: {
+                "page_id": 77,
+                "title": "Sibling Page",
+                "url": "https://example.atlassian.net/wiki/spaces/TEST/pages/77/Sibling+Page",
+            }
+        }
+        html = '<a href="sibling/page.md">Sibling</a>'
+        result = conv.add_cross_file_links(html, page_map)
+        assert 'href="https://example.atlassian.net/wiki/spaces/TEST/pages/77/Sibling+Page"' in result
+
+    def test_multiple_links_all_resolved(self, cc_with_tempfile):
+        conv, tmp_path = cc_with_tempfile
+        abs_a = os.path.normpath(os.path.join(conv.source_folder, "a.md"))
+        abs_b = os.path.normpath(os.path.join(conv.source_folder, "b.md"))
+        page_map = {
+            abs_a: {"page_id": 1, "title": "A", "url": "https://wiki/A"},
+            abs_b: {"page_id": 2, "title": "B", "url": "https://wiki/B"},
+        }
+        html = '<a href="a.md">A</a> and <a href="b.md">B</a>'
+        result = conv.add_cross_file_links(html, page_map)
+        assert 'href="https://wiki/A"' in result
+        assert 'href="https://wiki/B"' in result
+        assert 'href="a.md"' not in result
+        assert 'href="b.md"' not in result
+
+    def test_non_md_links_not_touched(self, cc_with_tempfile):
+        conv, _ = cc_with_tempfile
+        page_map = {}
+        html = '<a href="https://example.com">External</a> <a href="#anchor">Anchor</a>'
+        result = conv.add_cross_file_links(html, page_map)
+        assert result == html
+
+    def test_empty_page_map_returns_html_unchanged(self, cc_with_tempfile):
+        conv, _ = cc_with_tempfile
+        html = '<a href="other.md">Other</a>'
+        result = conv.add_cross_file_links(html, {})
+        assert result == html
+
+    def test_convert_passes_page_map_and_calls_cross_file_links(self):
+        """Ensure convert() calls add_cross_file_links when page_map is provided."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
+            f.write("# Test\n\nContent")
+            md_path = f.name
+        try:
+            with patch("md_to_conf.confluence_converter.ConfluenceApiClient"):
+                conv = ConfluenceConverter(
+                    file=md_path,
+                    md_source="default",
+                    title="Test",
+                    org_name="test-org",
+                    use_ssl=True,
+                    user_name="testuser",
+                    space_key="TEST",
+                    api_key="key",
+                    ancestor=None,
+                    version=2,
+                )
+            mock_page = PageInfo(id=55, spaceId=1, version=1, link="link")
+            conv.confluence_client.get_page.return_value = mock_page
+            conv.confluence_client.get_page_properties.return_value = []
+            conv.add_images = Mock(return_value="<p>html</p>")
+            conv.add_local_refs = Mock(return_value="<p>html</p>")
+            conv.add_cross_file_links = Mock(return_value="<p>html</p>")
+            conv.get_parent_page = Mock(return_value=0)
+
+            fake_map = {os.path.abspath(md_path): {"page_id": 55, "title": "Test", "url": "https://x"}}
+            conv.convert(
+                simulate=False,
+                delete=False,
+                remove_emojies=False,
+                add_contents=False,
+                labels=[],
+                properties={},
+                attachments=[],
+                page_map=fake_map,
+            )
+
+            conv.add_cross_file_links.assert_called_once()
+        finally:
+            os.unlink(md_path)
+
+    def test_convert_returns_page_info_dict(self):
+        """convert() should return a dict with page_id, title, and url."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
+            f.write("# My Page\n\nContent")
+            md_path = f.name
+        try:
+            with patch("md_to_conf.confluence_converter.ConfluenceApiClient"):
+                conv = ConfluenceConverter(
+                    file=md_path,
+                    md_source="default",
+                    title=None,
+                    org_name="myorg",
+                    use_ssl=True,
+                    user_name="user",
+                    space_key="SP",
+                    api_key="key",
+                    ancestor=None,
+                    version=2,
+                )
+            mock_page = PageInfo(id=77, spaceId=1, version=1, link="link")
+            conv.confluence_client.get_page.return_value = mock_page
+            conv.confluence_client.get_page_properties.return_value = []
+            conv.add_images = Mock(return_value="<p>html</p>")
+            conv.add_local_refs = Mock(return_value="<p>html</p>")
+            conv.get_parent_page = Mock(return_value=0)
+
+            result = conv.convert(
+                simulate=False,
+                delete=False,
+                remove_emojies=False,
+                add_contents=False,
+                labels=[],
+                properties={},
+                attachments=[],
+            )
+
+            assert result is not None
+            assert result["page_id"] == 77
+            assert "title" in result
+            assert "url" in result
+            assert "77" in result["url"]
+        finally:
+            os.unlink(md_path)
+
