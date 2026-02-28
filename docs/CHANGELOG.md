@@ -13,6 +13,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.2.0] - 2026-02-27
+
+### Added
+
+- Mermaid diagram rendering via `--mermaid` flag — converts fenced `mermaid` code blocks to PNG images uploaded as Confluence attachments
+- Two-strategy Mermaid rendering pipeline: local `mmdc` CLI (no network required) with automatic fallback to the `mermaid.ink` public API
+- Multi-file processing — `markdownFile` argument now accepts multiple files and glob patterns (e.g. `docs/*.md`, `**/*.md`)
+- `--exclude` flag for glob-based file exclusion; can be specified multiple times (`--exclude 'docs/draft*.md'`)
+- Inline exclusion support via `!`-prefixed patterns in the file list (e.g. `!docs/draft.md`)
+- Cross-file link resolution — relative `.md` links between co-published files are automatically rewritten to their Confluence page URLs
+- `add_cross_file_links()` method in `ConfluenceConverter` for inter-document link resolution
+
+### Fixed
+
+- Regex patterns refactored to resolve SonarQube security issues
+
+## [1.1.2] - 2025-10-20
+
+### Fixed
+
+- Attachment upload and download endpoints reverted to REST API v1 paths (`/rest/api/content/{id}/child/attachment/`) for compatibility
+
 ## [1.1.1] - 2025-10-18
 
 ### Changed
