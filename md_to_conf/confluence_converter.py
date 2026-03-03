@@ -169,21 +169,23 @@ class ConfluenceConverter:
         """
         for tag in re.findall(r"<img(.*?)\/>", html):
             rel_path = re.search(r'src="(.*?)"', tag).group(1)
-            alt_text = re.search(r'alt="(.*?)"', tag).group(1)
+            alt_match = re.search(r'alt="(.*?)"', tag)
+            alt_text = alt_match.group(1) if alt_match else ""
+            if re.search(r"http.*", rel_path) is not None:
+                continue
             abs_path = os.path.join(self.source_folder, rel_path)
             basename = os.path.basename(rel_path)
             self.confluence_client.upload_attachment(page_id, abs_path, alt_text)
-            if re.search(r"http.*", rel_path) is None:
-                if self.get_confluence_api_url().endswith("/wiki"):
-                    html = html.replace(
-                        "%s" % (rel_path),
-                        "/wiki/download/attachments/%d/%s" % (page_id, basename),
-                    )
-                else:
-                    html = html.replace(
-                        "%s" % (rel_path),
-                        "/download/attachments/%d/%s" % (page_id, basename),
-                    )
+            if self.get_confluence_api_url().endswith("/wiki"):
+                html = html.replace(
+                    "%s" % (rel_path),
+                    "/wiki/download/attachments/%d/%s" % (page_id, basename),
+                )
+            else:
+                html = html.replace(
+                    "%s" % (rel_path),
+                    "/download/attachments/%d/%s" % (page_id, basename),
+                )
         return html
 
     def add_local_refs(

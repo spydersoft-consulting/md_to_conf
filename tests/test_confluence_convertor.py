@@ -3,7 +3,10 @@ import os
 import tempfile
 from unittest.mock import Mock, patch, mock_open
 from md_to_conf.confluence_converter import ConfluenceConverter
+from md_to_conf.converter import MarkdownConverter
 from md_to_conf.client import PageInfo
+
+TESTFILES_DIR = os.path.join(os.path.dirname(__file__), "testfiles")
 
 
 class TestConfluenceConverter:
@@ -245,7 +248,7 @@ class TestConfluenceConverter:
         assert result == expected_html
 
     def test_add_images_with_http_url(self, confluence_converter):
-        """Test add_images method with HTTP URL (should not be replaced)"""
+        """Test add_images method with HTTP URL (should not be uploaded or replaced)"""
         html = '<p>Test <img src="http://example.com/image.png" alt="Test Image"/> content</p>'
         page_id = 123
 
@@ -253,9 +256,9 @@ class TestConfluenceConverter:
 
         result = confluence_converter.add_images(page_id, html)
 
-        # HTTP URLs should not be replaced
+        # HTTP URLs should not be replaced and should NOT be uploaded
         assert result == html
-        confluence_converter.confluence_client.upload_attachment.assert_called_once()
+        confluence_converter.confluence_client.upload_attachment.assert_not_called()
 
     def test_add_attachments(self, confluence_converter):
         """Test add_attachments method"""
@@ -685,6 +688,141 @@ class TestConfluenceConverter:
 
         assert result == html
         confluence_converter.confluence_client.upload_attachment.assert_not_called()
+
+    def test_add_images_with_real_file_on_disk(self, confluence_converter):
+        """Test add_images uploads a real file resolved relative to source_folder"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            img_path = os.path.join(tmpdir, "photo.png")
+            with open(img_path, "wb") as f:
+                f.write(b"\x89PNG\r\n")
+
+            confluence_converter.source_folder = tmpdir
+            page_id = 123
+            html = '<p><img src="photo.png" alt="A photo"/></p>'
+
+            upload_calls = []
+            confluence_converter.confluence_client.upload_attachment = Mock(
+                side_effect=lambda pid, path, comment: upload_calls.append((pid, path, comment))
+            )
+
+            result = confluence_converter.add_images(page_id, html)
+
+            assert len(upload_calls) == 1
+            assert upload_calls[0][0] == page_id
+            assert upload_calls[0][1] == img_path
+            assert upload_calls[0][2] == "A photo"
+            assert '/wiki/download/attachments/123/photo.png' in result
+
+    def test_add_images_with_subdirectory_path(self, confluence_converter):
+        """Test add_images resolves images in subdirectories correctly"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            subdir = os.path.join(tmpdir, "images")
+            os.makedirs(subdir)
+            img_path = os.path.join(subdir, "diagram.png")
+            with open(img_path, "wb") as f:
+                f.write(b"\x89PNG\r\n")
+
+            confluence_converter.source_folder = tmpdir
+            page_id = 456
+            html = '<p><img src="images/diagram.png" alt="Diagram"/></p>'
+
+            upload_calls = []
+            confluence_converter.confluence_client.upload_attachment = Mock(
+                side_effect=lambda pid, path, comment: upload_calls.append((pid, path, comment))
+            )
+
+            result = confluence_converter.add_images(page_id, html)
+
+            assert len(upload_calls) == 1
+            assert upload_calls[0][1] == img_path
+            # basename is used in the attachment URL, not the full relative path
+            assert '/wiki/download/attachments/456/diagram.png' in result
+            assert 'images/diagram.png' not in result
+
+    def test_add_images_without_alt_attribute(self, confluence_converter):
+        """Test add_images does not crash when img tag has no alt attribute"""
+        page_id = 123
+        html = '<p><img src="photo.png"/></p>'
+
+        confluence_converter.confluence_client.upload_attachment = Mock()
+
+        # Should not raise AttributeError
+        result = confluence_converter.add_images(page_id, html)
+
+        confluence_converter.confluence_client.upload_attachment.assert_called_once()
+        call_args = confluence_converter.confluence_client.upload_attachment.call_args[0]
+        assert call_args[2] == ""  # alt_text defaults to empty string
+
+    def test_add_images_http_url_does_not_upload(self, confluence_converter):
+        """Test that HTTP image URLs are skipped entirely - not uploaded or replaced"""
+        page_id = 123
+        html = '<p><img src="https://example.com/banner.png" alt="Banner"/></p>'
+
+        confluence_converter.confluence_client.upload_attachment = Mock()
+
+        result = confluence_converter.add_images(page_id, html)
+
+        confluence_converter.confluence_client.upload_attachment.assert_not_called()
+        assert result == html
+
+    def test_add_images_from_advanced_md(self, confluence_converter):
+        """Integration test: add_images against the converted advanced.md file.
+
+        Verifies that:
+        - simple.png (same dir) is uploaded with its absolute path
+        - images/diagram.png (subdirectory) is uploaded with its absolute path
+        - images/screenshot.jpg (subdirectory) is uploaded with its absolute path
+        - https://example.com/badge.png (remote) is NOT uploaded
+        - attachment URLs in the returned HTML use only the basename
+        """
+        advanced_md = os.path.join(TESTFILES_DIR, "advanced.md")
+        confluence_converter.source_folder = TESTFILES_DIR
+
+        converter = MarkdownConverter(
+            advanced_md,
+            confluence_converter.get_confluence_api_url(),
+            "default",
+            2,
+        )
+        html = converter.convert_md_to_conf_html(
+            has_title=False,
+            remove_emojies=False,
+            add_contents=False,
+            render_mermaid=False,
+        )
+
+        page_id = 123
+        uploaded = []
+        confluence_converter.confluence_client.upload_attachment = Mock(
+            side_effect=lambda pid, path, comment: uploaded.append((pid, path, comment))
+        )
+
+        result = confluence_converter.add_images(page_id, html)
+
+        uploaded_paths = [u[1] for u in uploaded]
+
+        # All uploads must have the correct page_id
+        assert all(u[0] == page_id for u in uploaded)
+
+        # Local images resolved relative to source_folder
+        assert os.path.join(TESTFILES_DIR, "simple.png") in uploaded_paths
+        assert os.path.join(TESTFILES_DIR, "images/diagram.png") in uploaded_paths
+        assert os.path.join(TESTFILES_DIR, "images/screenshot.jpg") in uploaded_paths
+
+        # Remote image must NOT be uploaded
+        assert not any("badge" in p for p in uploaded_paths)
+        assert not any("example.com" in p for p in uploaded_paths)
+
+        # Exactly 3 uploads (the three local images)
+        assert len(uploaded) == 3
+
+        # Attachment URLs in HTML use basenames only, under /wiki/download/attachments/
+        assert '/wiki/download/attachments/123/simple.png' in result
+        assert '/wiki/download/attachments/123/diagram.png' in result
+        assert '/wiki/download/attachments/123/screenshot.jpg' in result
+
+        # Remote image src must be unchanged
+        assert 'https://example.com/badge.png' in result
 
     def test_get_properties_to_update_mixed_scenario(self, confluence_converter):
         """Test get_properties_to_update with mixed new and existing properties"""
