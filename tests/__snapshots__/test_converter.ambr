@@ -100,6 +100,15 @@
   <p><ac:structured-macro ac:name="warning"><ac:rich-text-body><p>This is an error.</p></ac:rich-text-body></ac:structured-macro></p>
   <p>Text above Note</p>
   <ac:adf-extension><ac:adf-node type="panel"><ac:adf-attribute key="panel-type">note</ac:adf-attribute><ac:adf-content><p>This is a note.</p></ac:adf-content></ac:adf-node></ac:adf-extension>
+  <h2>Images</h2>
+  <p>Image in the same directory:</p>
+  <p><img alt="Simple image" src="simple.png" /></p>
+  <p>Image in a subdirectory:</p>
+  <p><img alt="Architecture diagram" src="images/diagram.png" /></p>
+  <p>Image in a subdirectory without descriptive alt text:</p>
+  <p><img alt="Screenshot" src="images/screenshot.jpg" /></p>
+  <p>Remote image (should not be uploaded as attachment):</p>
+  <p><img alt="Remote badge" src="https://example.com/badge.png" /></p>
   '''
 # ---
 # name: test_converter_html_advanced_with_toc
@@ -158,6 +167,15 @@
   <p><ac:structured-macro ac:name="warning"><ac:rich-text-body><p>This is an error.</p></ac:rich-text-body></ac:structured-macro></p>
   <p>Text above Note</p>
   <ac:adf-extension><ac:adf-node type="panel"><ac:adf-attribute key="panel-type">note</ac:adf-attribute><ac:adf-content><p>This is a note.</p></ac:adf-content></ac:adf-node></ac:adf-extension>
+  <h2>Images</h2>
+  <p>Image in the same directory:</p>
+  <p><img alt="Simple image" src="simple.png" /></p>
+  <p>Image in a subdirectory:</p>
+  <p><img alt="Architecture diagram" src="images/diagram.png" /></p>
+  <p>Image in a subdirectory without descriptive alt text:</p>
+  <p><img alt="Screenshot" src="images/screenshot.jpg" /></p>
+  <p>Remote image (should not be uploaded as attachment):</p>
+  <p><img alt="Remote badge" src="https://example.com/badge.png" /></p>
   '''
 # ---
 # name: test_toc_convert

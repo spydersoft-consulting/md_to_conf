@@ -56,3 +56,21 @@ Text above error
 Text above Note
 
 > Note: This is a note.
+
+## Images
+
+Image in the same directory:
+
+![Simple image](simple.png)
+
+Image in a subdirectory:
+
+![Architecture diagram](images/diagram.png)
+
+Image in a subdirectory without descriptive alt text:
+
+![Screenshot](images/screenshot.jpg)
+
+Remote image (should not be uploaded as attachment):
+
+![Remote badge](https://example.com/badge.png)
