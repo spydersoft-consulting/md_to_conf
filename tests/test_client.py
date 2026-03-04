@@ -121,14 +121,29 @@ def test_get_space_id_cached(mock_check_errors, mock_get_session, test_client):
 @patch("md_to_conf.client.ConfluenceApiClient.get_session")
 @patch("md_to_conf.client.ConfluenceApiClient.check_errors_and_get_json")
 @patch("md_to_conf.client.ConfluenceApiClient.log_not_found")
-def test_get_space_id_not_found(
+def test_get_space_id_not_found_404(
     mock_log_not_found, mock_check_errors, mock_get_session, test_client
 ):
+    """A 404 response must log the error and exit immediately."""
     mock_check_errors.return_value = CheckedResponse(404, {})
 
-    space_id = test_client.get_space_id()
-    assert space_id == -1
+    with pytest.raises(SystemExit) as exc_info:
+        test_client.get_space_id()
+    assert exc_info.value.code == 1
     mock_log_not_found.assert_called_once_with("Space", {"Space Key": "PO"})
+
+
+@patch("md_to_conf.client.ConfluenceApiClient.get_session")
+@patch("md_to_conf.client.ConfluenceApiClient.check_errors_and_get_json")
+def test_get_space_id_not_found_empty_results(
+    mock_check_errors, mock_get_session, test_client
+):
+    """A 200 response with an empty results list means the key doesn't exist."""
+    mock_check_errors.return_value = CheckedResponse(200, {"results": []})
+
+    with pytest.raises(SystemExit) as exc_info:
+        test_client.get_space_id()
+    assert exc_info.value.code == 1
 
 
 @patch("md_to_conf.client.ConfluenceApiClient.get_session")
@@ -312,7 +327,7 @@ def test_get_page_not_found(
     assert result.spaceId == 0
     assert result.version == 0
     assert result.link == ""
-    mock_log_not_found.assert_called_once_with("Page", {"Space Id": "12345"})
+    mock_log_not_found.assert_called_once_with("Page", {"Space Id": "12345", "Title": "Test Page"})
 
 
 @patch("md_to_conf.client.ConfluenceApiClient.get_session")

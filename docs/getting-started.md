@@ -117,7 +117,14 @@ Use **-d** or **--delete** to delete the page instead of create it. Obviously th
 
 Use **-n** or **--nossl** to specify a non-SSL url, i.e. **<http://>** instead of **<https://>**.
 
-Use **-l** or **--loglevel** to specify a different logging level, i.e **DEBUG**.
+Use **-l** or **--loglevel** to specify a different logging level. Accepted values: `DEBUG`, `INFO` (default), `WARNING`, `ERROR`.
+
+Use **-V** or **--verbose** to enable verbose (DEBUG-level) logging across all modules. This is the recommended way to diagnose errors such as incorrect space keys, missing ancestor pages, or unexpected API responses. It is equivalent to `--loglevel DEBUG`.
+
+```bash
+# Diagnose a failed upload
+md-to-conf readme.md TST --verbose
+```
 
 Use **-s** or **--simulate** to stop processing before interacting with confluence API, i.e. only
  converting the markdown document to confluence format.
@@ -162,6 +169,45 @@ The tool attempts rendering in the following order:
 If rendering fails for a diagram, the original code block is left intact and a warning is logged.
 
 > **Tip:** For CI/CD pipelines without npm available, the `mermaid.ink` fallback means `--mermaid` works out of the box with no additional tooling.
+
+## Troubleshooting
+
+### Getting better diagnostic output
+
+Run with `--verbose` (or `-V`) to enable DEBUG-level logging. This prints the exact API URLs being called, HTTP status codes for every request, and additional context for each step:
+
+```bash
+md-to-conf readme.md TST --verbose
+```
+
+### Space key not found
+
+If the space key you provided does not exist or the authenticated user cannot access it, the tool exits immediately with a clear error rather than making further API calls:
+
+```
+ERROR - Space key 'TST' was not found in Confluence.
+ERROR -   Confluence API URL: https://myorg.atlassian.net/wiki
+ERROR -   Space Key: TST
+ERROR - Hint: check that the space key is correct and that the authenticated user has permission to access it.
+```
+
+Common causes:
+- Typo in the space key (keys are case-sensitive).
+- The API key belongs to a user who does not have permission to view the space.
+- Wrong `--orgname` value pointing at a different Confluence instance.
+
+### Ancestor page not found
+
+If `--ancestor` is supplied but the page or folder title cannot be found in the target space, the tool exits with a diagnostic error:
+
+```
+ERROR - Error: Ancestor page/folder 'My Docs' was not found in space 'TST'.
+ERROR - Hint: check that --ancestor matches the exact page or folder title in the target Confluence space.
+```
+
+Common causes:
+- The title does not exactly match the page name in Confluence (including capitalisation and punctuation).
+- The page is in a different space than the one specified.
 
 ## Markdown
 
