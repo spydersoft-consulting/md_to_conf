@@ -1,4 +1,5 @@
 import logging
+import sys
 import typing
 import os
 import re
@@ -388,15 +389,38 @@ class ConfluenceConverter:
     def get_parent_page(self):
         parent_page_id = 0
         if self.ancestor:
+            LOGGER.debug("Resolving ancestor page/folder: %r", self.ancestor)
             parent_page = self.confluence_client.get_page(self.ancestor)
             if parent_page is not None and parent_page.id > 0:
                 parent_page_id = parent_page.id
+                LOGGER.debug(
+                    "Ancestor resolved as page: id=%d, title=%r",
+                    parent_page.id,
+                    self.ancestor,
+                )
             else:
+                LOGGER.debug(
+                    "Ancestor %r not found as a page; searching for a folder.", self.ancestor
+                )
                 parent_folder = self.confluence_client.get_folder(self.ancestor)
                 if parent_folder > 0:
                     parent_page_id = parent_folder
+                    LOGGER.debug(
+                        "Ancestor resolved as folder: id=%d, title=%r",
+                        parent_folder,
+                        self.ancestor,
+                    )
 
-        if parent_page_id == 0:
-            LOGGER.error("Error: Parent page/folder does not exist: %s", self.ancestor)
+            if parent_page_id == 0:
+                LOGGER.error(
+                    "Error: Ancestor page/folder '%s' was not found in space '%s'.",
+                    self.ancestor,
+                    self.space_key,
+                )
+                LOGGER.error(
+                    "Hint: check that --ancestor matches the exact page or folder "
+                    "title in the target Confluence space."
+                )
+                sys.exit(1)
 
         return parent_page_id

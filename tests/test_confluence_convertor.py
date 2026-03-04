@@ -186,23 +186,20 @@ class TestConfluenceConverter:
         )
 
     def test_get_parent_page_neither_page_nor_folder_found(self, confluence_converter):
-        """Test get_parent_page when neither ancestor page nor folder exists"""
+        """Test get_parent_page exits when neither ancestor page nor folder exists"""
         confluence_converter.confluence_client.get_page.return_value = None
         confluence_converter.confluence_client.get_folder.return_value = 0
 
-        with patch("md_to_conf.confluence_converter.LOGGER") as mock_logger:
-            parent_id = confluence_converter.get_parent_page()
+        with pytest.raises(SystemExit) as exc_info:
+            confluence_converter.get_parent_page()
 
-            assert parent_id == 0
-            confluence_converter.confluence_client.get_page.assert_called_once_with(
-                "ancestor-page"
-            )
-            confluence_converter.confluence_client.get_folder.assert_called_once_with(
-                "ancestor-page"
-            )
-            mock_logger.error.assert_called_once_with(
-                "Error: Parent page/folder does not exist: %s", "ancestor-page"
-            )
+        assert exc_info.value.code == 1
+        confluence_converter.confluence_client.get_page.assert_called_once_with(
+            "ancestor-page"
+        )
+        confluence_converter.confluence_client.get_folder.assert_called_once_with(
+            "ancestor-page"
+        )
 
     def test_get_parent_page_folder_found_after_page_not_found(
         self, confluence_converter

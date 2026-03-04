@@ -111,7 +111,10 @@ class ConfluenceApiClient:
         if retry:
             retry_max_requests = 5
             retry_backoff_factor = 0.1
-            retry_status_forcelist = (404, 500, 501, 502, 503, 504)
+            # 404 is intentionally excluded: it is not a transient error and
+            # retrying it would produce multiple misleading failure messages
+            # (e.g. when a space key or ancestor page title is wrong).
+            retry_status_forcelist = (500, 501, 502, 503, 504)
             retry = requests.adapters.Retry(
                 total=retry_max_requests,
                 connect=retry_max_requests,
@@ -139,11 +142,12 @@ class ConfluenceApiClient:
             log_values: Additional key/value pairs to log
 
         """
-        LOGGER.error(f"{object_name} not found.")
-        LOGGER.error("Diagnostic Information")
-        LOGGER.error(f"\tURL: {self.confluence_api_url}")
+        LOGGER.error("%s not found.", object_name)
+        LOGGER.error("Diagnostic Information:")
+        LOGGER.error("\tConfluence API URL: %s", self.confluence_api_url)
         for key in log_values:
-            LOGGER.error(f"\t{key}: {log_values[key]}")
+            LOGGER.error("\t%s: %s", key, log_values[key])
+        LOGGER.debug("Hint: verify the value above is correct and accessible with the provided credentials.")
 
     def check_errors_and_get_json(self, response: requests.Response) -> CheckedResponse:
         """
@@ -153,6 +157,12 @@ class ConfluenceApiClient:
             response : The response from a request
 
         """
+        LOGGER.debug(
+            "HTTP %s %s → status %d",
+            response.request.method if response.request else "?",
+            response.url,
+            response.status_code,
+        )
         try:
             response.raise_for_status()
         except requests.RequestException as err:
@@ -179,6 +189,7 @@ class ConfluenceApiClient:
             parent_id: confluence parentId
         """
         LOGGER.info("Updating page...")
+        LOGGER.debug("update_page: page_id=%d, title=%r, version=%d, parent_id=%d", page_id, title, version, parent_id)
 
         url = "%s/api/v2/pages/%d" % (self.confluence_api_url, page_id)
 
@@ -212,7 +223,12 @@ class ConfluenceApiClient:
 
     def get_space_id(self) -> int:
         """
-        Retrieve the integer space ID for the current self.space_key
+        Retrieve the integer space ID for the current self.space_key.
+
+        Exits the program if the space cannot be found, because all subsequent
+        operations (page lookup, page creation, ancestor resolution) depend on
+        a valid space ID.  Continuing with ``-1`` would cause a cascade of
+        misleading 404 errors against an invalid URL.
 
         Returns:
             The integer ID for the space_key of this instance
@@ -222,15 +238,37 @@ class ConfluenceApiClient:
             return self.space_id
 
         url = "%s/api/v2/spaces?keys=%s" % (self.confluence_api_url, self.space_key)
+        LOGGER.debug("Fetching space id: GET %s", url)
 
         response = self.check_errors_and_get_json(self.get_session().get(url))
 
         if response.status_code == 404:
             self.log_not_found("Space", {"Space Key": self.space_key})
-        else:
-            if len(response.data["results"]) >= 1:
-                self.space_id = int(response.data["results"][0]["id"])
-                self.space_home_page_id = int(response.data["results"][0]["homepageId"])
+            LOGGER.error("Cannot continue without a valid space. Exiting.")
+            sys.exit(1)
+
+        if len(response.data["results"]) == 0:
+            LOGGER.error(
+                "Space key '%s' was not found in Confluence.", self.space_key
+            )
+            LOGGER.error("Diagnostic Information:")
+            LOGGER.error("\tConfluence API URL: %s", self.confluence_api_url)
+            LOGGER.error("\tSpace Key: %s", self.space_key)
+            LOGGER.error(
+                "Hint: check that the space key is correct and that the "
+                "authenticated user has permission to access it."
+            )
+            LOGGER.error("Cannot continue without a valid space. Exiting.")
+            sys.exit(1)
+
+        self.space_id = int(response.data["results"][0]["id"])
+        self.space_home_page_id = int(response.data["results"][0]["homepageId"])
+        LOGGER.debug(
+            "Resolved space key '%s' → space_id=%d, home_page_id=%d",
+            self.space_key,
+            self.space_id,
+            self.space_home_page_id,
+        )
 
         return self.space_id
 
@@ -247,6 +285,7 @@ class ConfluenceApiClient:
             PageInfo: A named tuple with page information
         """
         LOGGER.info("Creating page...")
+        LOGGER.debug("create_page: title=%r, parent_id=%d", title, parent_id)
 
         url = "%s/api/v2/pages" % self.confluence_api_url
 
@@ -317,10 +356,11 @@ class ConfluenceApiClient:
             space_id,
             urllib.parse.quote_plus(title),
         )
+        LOGGER.debug("Fetching page by title: GET %s", url)
 
         response = self.check_errors_and_get_json(self.get_session(retry=True).get(url))
         if response.status_code == 404:
-            self.log_not_found("Page", {"Space Id": "%d" % space_id})
+            self.log_not_found("Page", {"Space Id": "%d" % space_id, "Title": title})
         else:
             data = response.data
 
@@ -374,6 +414,10 @@ class ConfluenceApiClient:
         self.get_space_id()
 
         LOGGER.debug("\tRetrieving folder information: %s", folder_name)
+        LOGGER.debug(
+            "Searching for folder under space home page id=%d",
+            self.space_home_page_id,
+        )
         url = "%s/api/v2/pages/%d/descendants?depth=5" % (
             self.confluence_api_url,
             self.space_home_page_id,

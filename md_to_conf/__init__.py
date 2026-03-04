@@ -75,7 +75,14 @@ def get_parser():
         "-l",
         "--loglevel",
         default="INFO",
-        help="Use this option to set the log verbosity.",
+        help="Use this option to set the log verbosity. Choices: DEBUG, INFO, WARNING, ERROR. Default: INFO.",
+    )
+    PARSER.add_argument(
+        "-V",
+        "--verbose",
+        action="store_true",
+        default=False,
+        help="Enable verbose (DEBUG-level) logging. Shorthand for --loglevel DEBUG.",
     )
     PARSER.add_argument(
         "-s",
@@ -264,8 +271,16 @@ def main():
 
     # Assign global variables
     try:
-        # Set log level
-        LOGGER.setLevel(getattr(logging, ARGS.loglevel.upper(), None))
+        # Set log level — --verbose overrides --loglevel.
+        # The root logger level must be lowered so that DEBUG messages from
+        # all sub-modules (client, converter, …) are not silently dropped
+        # before they reach any handler.
+        if ARGS.verbose:
+            log_level = logging.DEBUG
+        else:
+            log_level = getattr(logging, ARGS.loglevel.upper(), logging.INFO)
+        logging.getLogger().setLevel(log_level)
+        LOGGER.setLevel(log_level)
 
         MARKDOWN_FILES = expand_file_globs(ARGS.markdownFile, ARGS.exclude_patterns)
         SPACE_KEY = ARGS.spacekey
@@ -298,6 +313,12 @@ def main():
     LOGGER.info("\t----------------------------------")
     LOGGER.info("Files to process:\t%d", len(MARKDOWN_FILES))
     LOGGER.info("Space Key:\t%s", SPACE_KEY)
+    if ANCESTOR:
+        LOGGER.info("Ancestor:\t%s", ANCESTOR)
+    LOGGER.debug("Org/URL:\t%s", ORGNAME)
+    LOGGER.debug("Username:\t%s", USERNAME)
+    if ARGS.verbose:
+        LOGGER.debug("Verbose logging is enabled (DEBUG level).")
 
     multi_file = len(MARKDOWN_FILES) > 1
 
