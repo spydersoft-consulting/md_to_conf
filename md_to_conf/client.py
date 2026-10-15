@@ -559,8 +559,12 @@ class ConfluenceApiClient:
             LOGGER.error("File %s cannot be found --> skip ", file)
             return False
 
+        # NOTE: "comment" must NOT go in `files` (even as a plain string value).
+        # requests gives every `files` entry a filename= attribute, which makes
+        # Confluence's multipart parser see two file parts and fail with a
+        # confusing 500 (MethodArgumentConversionNotSupportedException). It
+        # has to be sent as a regular form field via `data` instead.
         file_to_upload = {
-            "comment": comment,
             "file": (filename, open(file, "rb"), content_type, {"Expires": "0"}),
         }
 
@@ -584,7 +588,14 @@ class ConfluenceApiClient:
 
         LOGGER.info("\tUploading attachment %s...", filename)
 
-        response = session.post(url, files=file_to_upload)
+        response = session.post(url, data={"comment": comment}, files=file_to_upload)
+        if not response.ok:
+            LOGGER.error(
+                "Attachment upload failed: HTTP %d for %s\nResponse body: %s",
+                response.status_code,
+                url,
+                response.text,
+            )
         response.raise_for_status()
 
         return True
