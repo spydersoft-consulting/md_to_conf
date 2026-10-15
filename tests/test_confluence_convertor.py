@@ -661,6 +661,56 @@ class TestConfluenceConverter:
             render_mermaid=False,
         )
 
+    @patch("md_to_conf.confluence_converter.MarkdownConverter")
+    @patch("builtins.open", new_callable=mock_open, read_data="# Test Title\n\nContent")
+    def test_convert_with_mermaid_uploads_image_exactly_once(
+        self, mock_file, mock_converter_class, confluence_converter
+    ):
+        """Regression test for mermaid images being uploaded twice.
+
+        convert() used to upload converter.mermaid_images explicitly and then
+        add_images() uploaded the same <img> tags again, hitting Confluence's
+        "update attachment" endpoint twice in a row and causing a 500 error.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            img_path = os.path.join(tmpdir, "mermaid_1.png")
+            with open(img_path, "wb") as f:
+                f.write(b"\x89PNG\r\n")
+
+            confluence_converter.source_folder = tmpdir
+
+            html = '<p><img src="%s" alt="mermaid-diagram-1" /></p>' % img_path
+            mock_converter = Mock()
+            mock_converter.convert_md_to_conf_html.return_value = html
+            mock_converter.mermaid_images = [img_path]
+            mock_converter_class.return_value = mock_converter
+
+            mock_page = PageInfo(id=0, spaceId=1, version=1, link="test-link")
+            confluence_converter.confluence_client.get_page.return_value = mock_page
+            created_page = PageInfo(id=123, spaceId=1, version=1, link="test-link")
+            confluence_converter.confluence_client.create_page.return_value = created_page
+            confluence_converter.confluence_client.update_page = Mock()
+            confluence_converter.confluence_client.get_page_properties.return_value = []
+            confluence_converter.confluence_client.upload_attachment = Mock()
+
+            confluence_converter.add_local_refs = Mock(side_effect=lambda pid, title, html, converter: html)
+            confluence_converter.get_parent_page = Mock(return_value=456)
+
+            confluence_converter.convert(
+                simulate=False,
+                delete=False,
+                remove_emojies=False,
+                add_contents=False,
+                labels=[],
+                properties={},
+                attachments=[],
+                render_mermaid=True,
+            )
+
+            confluence_converter.confluence_client.upload_attachment.assert_called_once_with(
+                123, img_path, "mermaid-diagram-1"
+            )
+
     def test_add_images_multiple_images(self, confluence_converter):
         """Test add_images method with multiple images"""
         html = '<p>First <img src="image1.png" alt="Image 1"/> and second <img src="image2.jpg" alt="Image 2"/> images</p>'

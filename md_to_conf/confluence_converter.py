@@ -95,12 +95,9 @@ class ConfluenceConverter:
 
         LOGGER.info("Page Id %d" % page.id)
 
-        # Upload mermaid-generated images before add_images so they are
-        # treated like any other attachment already on the page.
-        if render_mermaid and converter.mermaid_images:
-            for img_path in converter.mermaid_images:
-                self.confluence_client.upload_attachment(page.id, img_path, "")
-
+        # Mermaid-rendered images are referenced via <img> tags just like any
+        # other local image, so add_images uploads them (and rewrites their
+        # src) without needing a separate upload pass here.
         html = self.add_images(page.id, html)
         # Add local references
         html = self.add_local_refs(page.id, title, html, converter)
