@@ -541,6 +541,45 @@ def test_upload_attachment_new_file(
 @patch("os.path.isfile")
 @patch("mimetypes.guess_type")
 @patch("builtins.open", new_callable=mock_open, read_data=b"file content")
+def test_upload_attachment_sends_comment_as_form_field_not_file(
+    mock_file,
+    mock_guess_type,
+    mock_isfile,
+    mock_get_attachment,
+    mock_get_session,
+    test_client,
+):
+    """Regression test: "comment" must go through `data`, not `files`.
+
+    requests gives every entry in `files` a filename= attribute, even plain
+    strings. Confluence's multipart parser then sees two file-like parts and
+    fails with a confusing 500 (MethodArgumentConversionNotSupportedException)
+    - confirmed against a real Confluence Cloud instance. "comment" must be a
+    plain form field via `data` instead.
+    """
+    mock_isfile.return_value = True
+    mock_guess_type.return_value = ("image/png", None)
+    mock_get_attachment.return_value = ""
+    mock_session = Mock()
+    mock_response = Mock()
+    mock_response.ok = True
+    mock_response.raise_for_status.return_value = None
+    mock_session.post.return_value = mock_response
+    mock_get_session.return_value = mock_session
+
+    test_client.upload_attachment(98765, "/path/to/test.png", "Test comment")
+
+    _, kwargs = mock_session.post.call_args
+    assert kwargs["data"] == {"comment": "Test comment"}
+    assert "comment" not in kwargs["files"]
+    assert "file" in kwargs["files"]
+
+
+@patch("md_to_conf.client.ConfluenceApiClient.get_session")
+@patch("md_to_conf.client.ConfluenceApiClient.get_attachment")
+@patch("os.path.isfile")
+@patch("mimetypes.guess_type")
+@patch("builtins.open", new_callable=mock_open, read_data=b"file content")
 def test_upload_attachment_existing_file(
     mock_file,
     mock_guess_type,
