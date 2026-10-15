@@ -1,4 +1,5 @@
 import pytest
+import json
 import os
 import tempfile
 from unittest.mock import Mock, patch, MagicMock
@@ -1472,6 +1473,35 @@ class TestRenderMermaid:
 
         assert result is True
         assert os.path.exists(output_path)
+
+    def test_mmdc_invoked_with_no_sandbox_puppeteer_config(self, mermaid_converter, tmp_path):
+        """Regression test: mmdc must launch Chromium with --no-sandbox.
+
+        CI runners commonly restrict unprivileged user namespaces, which
+        breaks Chromium's default sandbox ("No usable sandbox!" fatal error).
+        mmdc is passed a Puppeteer config file via -p disabling the sandbox.
+        """
+        output_path = str(tmp_path / "out.png")
+        captured_cmd = []
+        captured_config = []
+
+        def fake_run(cmd, **kwargs):
+            captured_cmd.extend(cmd)
+            # Read the puppeteer config now - it's unlinked once _render_mermaid returns.
+            config_path = cmd[cmd.index("-p") + 1]
+            with open(config_path) as f:
+                captured_config.append(json.load(f))
+            open(output_path, "wb").close()
+            result = MagicMock()
+            result.returncode = 0
+            return result
+
+        with patch("shutil.which", return_value="/usr/bin/mmdc"):
+            with patch("subprocess.run", side_effect=fake_run):
+                mermaid_converter._render_mermaid(MERMAID_SOURCE, output_path)
+
+        assert "-p" in captured_cmd
+        assert "--no-sandbox" in captured_config[0]["args"]
 
     def test_mmdc_nonzero_exit_falls_back_to_ink(self, mermaid_converter, tmp_path):
         output_path = str(tmp_path / "out.png")

@@ -1,5 +1,6 @@
 import base64
 import html as html_lib
+import json
 import logging
 import os
 import re
@@ -266,9 +267,27 @@ class MarkdownConverter:
             ) as tmp_mmd:
                 tmp_mmd.write(source)
                 tmp_mmd_path = tmp_mmd.name
+            # mmdc launches Chromium via Puppeteer. CI runners commonly restrict
+            # unprivileged user namespaces (e.g. AppArmor on Ubuntu 23.10+),
+            # which breaks Chromium's own sandbox; --no-sandbox is the standard
+            # workaround for ephemeral, already-isolated CI containers.
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".json", delete=False
+            ) as tmp_puppeteer_config:
+                json.dump(
+                    {"args": ["--no-sandbox", "--disable-setuid-sandbox"]},
+                    tmp_puppeteer_config,
+                )
+                tmp_puppeteer_config_path = tmp_puppeteer_config.name
             try:
                 result = subprocess.run(
-                    [mmdc_path, "-i", tmp_mmd_path, "-o", output_path, "-e", "png"],
+                    [
+                        mmdc_path,
+                        "-i", tmp_mmd_path,
+                        "-o", output_path,
+                        "-e", "png",
+                        "-p", tmp_puppeteer_config_path,
+                    ],
                     capture_output=True,
                     timeout=60,
                 )
@@ -283,10 +302,11 @@ class MarkdownConverter:
             except Exception as exc:
                 LOGGER.warning("mmdc execution failed: %s", exc)
             finally:
-                try:
-                    os.unlink(tmp_mmd_path)
-                except OSError:
-                    pass
+                for tmp_path in (tmp_mmd_path, tmp_puppeteer_config_path):
+                    try:
+                        os.unlink(tmp_path)
+                    except OSError:
+                        pass
 
         # ── Strategy 2: mermaid.ink public API ─────────────────────────────
         try:
