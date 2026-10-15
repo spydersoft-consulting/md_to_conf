@@ -585,6 +585,13 @@ class ConfluenceApiClient:
         LOGGER.info("\tUploading attachment %s...", filename)
 
         response = session.post(url, files=file_to_upload)
+        if not response.ok:
+            LOGGER.error(
+                "Attachment upload failed: HTTP %d for %s\nResponse body: %s",
+                response.status_code,
+                url,
+                response.text,
+            )
         response.raise_for_status()
 
         return True

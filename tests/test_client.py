@@ -564,6 +564,48 @@ def test_upload_attachment_existing_file(
     assert result is True
 
 
+@patch("md_to_conf.client.ConfluenceApiClient.get_session")
+@patch("md_to_conf.client.ConfluenceApiClient.get_attachment")
+@patch("os.path.isfile")
+@patch("mimetypes.guess_type")
+@patch("builtins.open", new_callable=mock_open, read_data=b"file content")
+def test_upload_attachment_logs_response_body_on_failure(
+    mock_file,
+    mock_guess_type,
+    mock_isfile,
+    mock_get_attachment,
+    mock_get_session,
+    test_client,
+    caplog,
+):
+    """Regression test: a failed upload must log Confluence's response body.
+
+    Previously only response.raise_for_status() was called, so the actual
+    reason Confluence rejected the upload (e.g. a 500 with a diagnostic
+    message) was swallowed and never visible in CI logs.
+    """
+    mock_isfile.return_value = True
+    mock_guess_type.return_value = ("image/png", None)
+    mock_get_attachment.return_value = ""
+    mock_session = Mock()
+    mock_response = Mock()
+    mock_response.ok = False
+    mock_response.status_code = 500
+    mock_response.text = "Internal server error: something went wrong"
+    mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
+        "500 Server Error", response=mock_response
+    )
+    mock_session.post.return_value = mock_response
+    mock_get_session.return_value = mock_session
+
+    with caplog.at_level(logging.ERROR):
+        with pytest.raises(requests.exceptions.HTTPError):
+            test_client.upload_attachment(98765, "/path/to/test.png", "Test attachment")
+
+    assert "Internal server error: something went wrong" in caplog.text
+    assert "500" in caplog.text
+
+
 def test_upload_attachment_http_url(test_client):
     result = test_client.upload_attachment(
         98765, "http://example.com/test.png", "Test attachment"
